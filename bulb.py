@@ -2,6 +2,7 @@
 
 
 import sys
+import driver
 
 MAX_COLOR = 255
 MIN_COLOR = 0
@@ -10,7 +11,7 @@ MIN_BRIGHT = 0
 
 class Bulb(object):
 
-	def __init__(self, addr, brightness = None, red = None, green = None, blue = None):
+	def __init__(self, id, driver, brightness = None, red = None, green = None, blue = None):
 		if (brightness is None):
 			brightness = MAX_BRIGHT
 		if (red is None):
@@ -19,17 +20,16 @@ class Bulb(object):
 			green = MAX_COLOR
 		if (blue is None):
 			blue = MAX_COLOR
-		self.addr = addr
+		self.id = addr
 		self.brightness = brightness 
 		self.red = red
 		self.green = green
 		self.blue = blue
+		self.driver = driver
 
 	def update_bulb(self):
-		f = open("/dev/xmas", "w")
-		f.write(chr(self.addr) + chr(self.brightness) + chr(self.blue) + chr(self.green) + chr(self.red))
-		f.close()
-
+		driver.write_led(self.id, self.brightness, self.green, self.blue, self.red)
+	
 	# Directly set values
 
 	def set_all(self, brightness, red, green, blue):
