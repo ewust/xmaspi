@@ -3,19 +3,21 @@
 
 import sys
 import Bulb as b
+import driver
 
 BROADCAST = -1
 
 class RGBStrand(object):
 
 	def __init__(self, num_bulbs = None):
+		d = driver.Driver([-1, 1], [0, 1], len(sys.argv)==1)	
 		if (num_bulbs is None):
 			num_bulbs = 50
 		self.num_bulbs = num_bulbs	
 		self.bulbs = []
 		for id in range(num_bulbs):
-			self.bulbs.append(b.Bulb(id))
-		self.broadcast = b.Bulb(BROADCAST)
+			self.bulbs.append(b.Bulb(id, d))
+		self.broadcast = b.Bulb(BROADCAST, d)
 
 	# Individual bulb commands	
 
