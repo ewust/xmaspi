@@ -40,7 +40,7 @@ class Driver(object):
             for i in range(STRAND_LEN):
                 self.phys_addr[led_id] = (strand_order[index], addr)
                 if do_init == True:
-                    self.send_pkt((index, addr), 0, 0, 0, 0)
+                    self.send_pkt((index, i), 0, 0, 0, 0)
                 addr += orientation
                 led_id += 1
  
