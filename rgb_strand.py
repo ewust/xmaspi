@@ -10,7 +10,7 @@ BROADCAST = -1
 class RGBStrand(object):
 
 	def __init__(self, num_bulbs = None):
-		d = driver.Driver([-1, 1], [0, 1], len(sys.argv)==1)	
+		d = driver.Driver()	
 		if (num_bulbs is None):
 			num_bulbs = 50
 		self.num_bulbs = num_bulbs	
@@ -19,7 +19,11 @@ class RGBStrand(object):
 			self.bulbs.append(bulb.Bulb(id, d))
 		self.broadcast = bulb.Bulb(BROADCAST, d)
 
-	# Individual bulb commands	
+	# Individual bulb commands
+
+	def set_bulb_attributes(self, id, brightness, red, green, blue):
+		self.bulbs[id].set_brightness(brightness)
+		self.bulbs[id].set_color(red, green, blue)	
 
 	def set_bulb_color(self, id, red, green, blue):
 		self.bulbs[id].set_color(red, green, blue)
@@ -36,7 +40,7 @@ class RGBStrand(object):
 	# Synchronized strand commands
 	
 	def set_strand_color(self, red, green, blue):
-		self.broadcast.set_color(red, green, blue)
+		self.cascading_strand_color(red, green, blue)
 
 	def set_strand_brightness(self, brightness):
 		self.broadcast.set_brightness(brightness)
@@ -51,11 +55,11 @@ class RGBStrand(object):
 
 	def cascading_strand_color(self, red, green, blue, mod=1):
 		for id in range(0, self.num_bulbs, mod):
-			set_bulb_color(id, red, green, blue)
+			self.set_bulb_color(id, red, green, blue)
 
 	def cascading_strand_brightness(self, brightness, mod=1):
 		for id in range(0, self.num_bulbs, mod):
-			set_bulb_brightness(id, brightness)
+			self.set_bulb_brightness(id, brightness)
 
 	def cascading_dim_strand(self, lower_brightness, rate=1, mod=1):
 		for id in range(0, self.num_bulbs, mod):
@@ -95,9 +99,15 @@ class RGBStrand(object):
 		for id in range(0, self.num_bulbs, mod):
 			self.saturate_bulb_color(id, channel, lower_val)	
 
-#	def move_left():
+	def scroll_back():
+		for id in reversed(range(1,self.num_bulbs)):
+			b = self.bulbs[id]
+			self.set_bulb_attributes(id-1, b.brightness, b.red, b.green, b.blue)
 
-#	def move_right():
+	def scroll_forward():
+		for id in reversed(range(0,self.num_bulbs-1)):
+			b = self.bulbs[id]
+			self.set_bulb_attributes(id+1, b.brightness, b.red, b.green, b.blue)
 
 	def turn_off(self):
 		self.set_strand_brightness(0)

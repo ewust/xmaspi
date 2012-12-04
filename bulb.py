@@ -20,7 +20,7 @@ class Bulb(object):
 			green = MAX_COLOR
 		if (blue is None):
 			blue = MAX_COLOR
-		self.id = addr
+		self.id = id
 		self.brightness = brightness 
 		self.red = red
 		self.green = green
@@ -28,7 +28,7 @@ class Bulb(object):
 		self.driver = driver
 
 	def update_bulb(self):
-		driver.write_led(self.id, self.brightness, self.green, self.blue, self.red)
+		self.driver.write_led(self.id, self.brightness, self.green, self.blue, self.red)
 	
 	# Directly set values
 
