@@ -44,35 +44,35 @@ class Bulb(object):
 	
 	def dim_to(self, lower_brightness):
 		while (self.brightness > lower_brightness and self.brightness >= MIN_BRIGHT):
-			step_down_brightness()
+			self.step_down_brightness()
 
 	def brighten_to(self, higher_brightness):
 		while (self.brightness < higher_brightness and self.brightness <= MAX_BRIGHT):
-			step_up_brightness()
+			self.step_up_brightness()
 
 	def fade_blue_to(self, lower_blue):
 		while (self.blue > lower_blue and self.blue >= MIN_COLOR):
-			step_down_blue()
+			self.step_down_blue()
 
 	def saturate_blue_to(self, higher_blue):
 		while (self.blue < higher_blue and self.blue <= MAX_BRIGHT):
-			step_up_blue()
+			self.step_up_blue()
 
 	def fade_green_to(self, lower_green):
 		while (self.green > lower_green and self.green >= MIN_COLOR):
-			step_down_green()
+			self.step_down_green()
 
 	def saturate_green_to(self, higher_green):
 		while (self.green < higher_green and self.green <= MAX_BRIGHT):
-			step_up_green()
+			self.step_up_green()
 
 	def fade_red_to(self, lower_red):
 		while (self.red > lower_red and self.red >= MIN_COLOR):
-			step_down_red()
+			self.step_down_red()
 
 	def saturate_red_to(self, higher_red):
 		while (self.red < higher_red and self.red <= MAX_BRIGHT):
-			step_up_red()
+			self.step_up_red()
 
 
 	# Step values up or down by one

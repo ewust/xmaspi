@@ -36,11 +36,11 @@ class RGBStrand(object):
 
 	def dim_strand(self, lower_brightness, mod):
 		for id in range(self.num_bulbs):
-			dim_bulb_to(id, lower_brightness)
+			self.dim_bulb_to(id, lower_brightness)
 
 	def brighten_strand(self, higher_brightness, mod):
 		for id in range(self.num_bulbs):
-			brighten_bulb_to(id, higher_brightness)
+			self.brighten_bulb_to(id, higher_brightness)
 
 	def fade_bulb_color(self, id, channel, lower_val):
 		if (channel == 'r'):
@@ -64,18 +64,18 @@ class RGBStrand(object):
 
 	def fade_strand_color(self, channel, lower_val, mod = 1):
 		for id in range(0, self.num_bulbs, mod):
-			fade_bulb_color(id, channel, lower_val)	
+			self.fade_bulb_color(id, channel, lower_val)	
 
 	def saturate_strand_color(self, channel, higher_val, mod = 1):
 		for id in range(0, self.num_bulbs, mod):
-			saturate_bulb_color(id, channel, lower_val)	
+			self.saturate_bulb_color(id, channel, lower_val)	
 
 #	def move_left():
 
 #	def move_right():
 
 	def turn_off(self):
-		set_strand_brightness(0)
+		self.set_strand_brightness(0)
 
 	def turn_on(self):
-		set_strand_brightness(MAX_BRIGHT)
+		self.set_strand_brightness(MAX_BRIGHT)
