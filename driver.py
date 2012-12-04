@@ -80,10 +80,10 @@ if __name__=="__main__":
     d = Driver([-1, 1], [0, 1], len(sys.argv)==1)
 
     if len(sys.argv) == 1:
-        d.write_led(0, 200, 15, 0, 0)
-        d.write_led(99, 200, 0, 0, 15)
+        d.write_led(0, 10, 15, 0, 0)
+        d.write_led(99, 10, 0, 0, 15)
         for led_id in range(100):
-            d.write_led(led_id, 200, 13, 0, 13)
+            d.write_led(led_id, 10, 13, 0, 13)
             time.sleep(0.05)
     else:
         d.write_led(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), int(sys.argv[5]))
