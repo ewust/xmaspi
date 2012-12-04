@@ -42,7 +42,7 @@ class Driver(object):
                 led_id += 1
  
 
-    def send_pkt(phys_addr, brightness, green, blue, red):
+    def send_pkt(self, phys_addr, brightness, green, blue, red):
         f = open('/dev/xmas', 'w')
         f.write(chr((phys_addr[0] << 6) | phys_addr[1]) + chr(brightness) + chr(green) + chr(blue) + chr(red))
         f.close()
