@@ -8,8 +8,10 @@ class Driver(object):
     # Strand orientations are arrays of either 1 or -1,
     # for each strand.
     # A strand with a -1 orientation will address 
-    def __init__(self, num_strands=1, strand_orientations=None, strand_order=None, do_init=False):
-        self.num_strands = num_strands 
+    def __init__(self, strand_orientations=None, strand_order=None, do_init=False):
+        self.num_strands = 1
+        if strand_orientations != None:
+            self.num_strands = len(strand_orientations)
         self.initialize(strand_orientations, strand_order, do_init)
         pass
 
@@ -33,6 +35,7 @@ class Driver(object):
                 addr = 0
             else:
                 addr = STRAND_LEN - 1
+            print orientation
 
             for i in range(STRAND_LEN):
                 self.phys_addr[led_id] = (strand_order[index], addr)
@@ -61,6 +64,6 @@ class Driver(object):
 
 if __name__=="__main__":
     # Test
-    d = Driver(2, [1, 1], [0, 1], True)
+    d = Driver([1, -1], [0, 1], True)
     d.write_led(0, 200, 15, 0, 0)
     d.write_led(99, 200, 0, 0, 15)
