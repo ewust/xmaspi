@@ -35,7 +35,6 @@ class Driver(object):
                 addr = 0
             else:
                 addr = STRAND_LEN - 1
-            print orientation
 
             for i in range(STRAND_LEN):
                 self.phys_addr[led_id] = (strand_order[index], addr)
@@ -64,6 +63,6 @@ class Driver(object):
 
 if __name__=="__main__":
     # Test
-    d = Driver([1, -1], [0, 1], True)
+    d = Driver([-1, 1], [0, 1], True)
     d.write_led(0, 200, 15, 0, 0)
     d.write_led(99, 200, 0, 0, 15)
