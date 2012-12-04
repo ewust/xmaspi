@@ -7,7 +7,7 @@ import Bulb
 class RGBStrand(object):
 
 	def __init__(self, num_bulbs = None):
-		if (num_holes is None):
+		if (num_bulbs is None):
 			num_bulbs = 50
 		self.num_bulbs = num_bulbs	
 		self.bulbs = []
