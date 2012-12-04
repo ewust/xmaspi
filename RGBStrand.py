@@ -4,7 +4,7 @@
 import sys
 import Bulb as b
 
-BROADCAST = 63
+BROADCAST = -1
 
 class RGBStrand(object):
 
@@ -65,7 +65,6 @@ class RGBStrand(object):
 
 
 # Smooth transitions between colors not happening for some reason 
-"""
 	def fade_bulb_color(self, id, channel, lower_val):
 		if (channel == 'r'):
 			self.bulbs[id].fade_red_to(lower_val)
@@ -93,7 +92,6 @@ class RGBStrand(object):
 	def saturate_strand_color(self, channel, higher_val, mod = 1):
 		for id in range(0, self.num_bulbs, mod):
 			self.saturate_bulb_color(id, channel, lower_val)	
-"""
 
 #	def move_left():
 
