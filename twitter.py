@@ -42,5 +42,4 @@ if __name__ == '__main__':
  
         while bs.shift():       
             bs.update_pattern()
-            bs.shift()
             time.sleep(1)
