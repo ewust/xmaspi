@@ -20,7 +20,7 @@ class Bulb(object):
 			green = MAX_COLOR
 		if (blue is None):
 			blue = MAX_COLOR
-		self.id = addr
+		self.id = id
 		self.brightness = brightness 
 		self.red = red
 		self.green = green
