@@ -53,7 +53,7 @@ class Driver(object):
         return self.phys_addr[led_id]
 
 
-    def write_led(led_id, brightness, green, blue, red):
+    def write_led(self, led_id, brightness, green, blue, red):
         # get physical address
         self.send_pkt(self.get_physical_addr(led_id), brightness, green, blue, red)
     
