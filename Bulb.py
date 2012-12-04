@@ -43,35 +43,35 @@ class Bulb(object):
 		update_bulb()
 	
 	def dim_to(lower_brightness):
-		while (self.brightness > lower_brightness && self.brightness >= MIN_BRIGHT):
+		while (self.brightness > lower_brightness and self.brightness >= MIN_BRIGHT):
 			step_down_brightness()
 
 	def brighten_to(higher_brightness):
-		while (self.brightness < higher_brightness && self.brightness <= MAX_BRIGHT):
+		while (self.brightness < higher_brightness and self.brightness <= MAX_BRIGHT):
 			step_up_brightness()
 
 	def fade_blue_to(lower_blue):
-		while (self.blue > lower_blue && self.blue >= MIN_COLOR):
+		while (self.blue > lower_blue and self.blue >= MIN_COLOR):
 			step_down_blue()
 
 	def saturate_blue_to(higher_blue):
-		while (self.blue < higher_blue && self.blue <= MAX_BRIGHT):
+		while (self.blue < higher_blue and self.blue <= MAX_BRIGHT):
 			step_up_blue()
 
 	def fade_green_to(lower_green):
-		while (self.green > lower_green && self.green >= MIN_COLOR):
+		while (self.green > lower_green and self.green >= MIN_COLOR):
 			step_down_green()
 
 	def saturate_green_to(higher_green):
-		while (self.green < higher_green && self.green <= MAX_BRIGHT):
+		while (self.green < higher_green and self.green <= MAX_BRIGHT):
 			step_up_green()
 
 	def fade_red_to(lower_red):
-		while (self.red > lower_red && self.red >= MIN_COLOR):
+		while (self.red > lower_red and self.red >= MIN_COLOR):
 			step_down_red()
 
 	def saturate_red_to(higher_red):
-		while (self.red < higher_red && self.red <= MAX_BRIGHT):
+		while (self.red < higher_red and self.red <= MAX_BRIGHT):
 			step_up_red()
 
 
