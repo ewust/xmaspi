@@ -2,7 +2,7 @@
 
 
 import sys
-import Bulb
+import Bulb as b
 
 class RGBStrand(object):
 
@@ -12,7 +12,7 @@ class RGBStrand(object):
 		self.num_bulbs = num_bulbs	
 		self.bulbs = []
 		for id in range(num_bulbs):
-			self.bulbs.append(Bulb(id))
+			self.bulbs.append(b.Bulb(id))
 
 	def set_bulb_color(id, red, green, blue):
 		self.bulbs[id].set_color(red, green, blue)
