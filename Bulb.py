@@ -12,13 +12,13 @@ class Bulb(object):
 
 	def __init__(self, addr, brightness = None, red = None, green = None, blue = None):
 		if (brightness is None):
-			brightness = 255
+			brightness = MAX_BRIGHT
 		if (red is None):
-			red = 255
+			red = MAX_COLOR
 		if (green is None):
-			green = 255
+			green = MAX_COLOR
 		if (blue is None):
-			blue = 255
+			blue = MAX_COLOR
 		self.addr = addr
 		self.brightness = brightness 
 		self.red = red
@@ -27,10 +27,14 @@ class Bulb(object):
 
 	def update_bulb(self):
 		f = open("/dev/xmas", "w")
-		f.write(chr(self.addr) + chr(self.brightness) + chr(self.green) + chr(self.blue) + chr(self.red))
+		f.write(chr(self.addr) + chr(self.brightness) + chr(self.blue) + chr(self.green) + chr(self.red))
 		f.close()
 
 	# Directly set values
+
+	def set_all(self, brightness, red, green, blue):
+		self.set_brightness(brightness)
+		self.set_color(red, green, blue)
 
 	def set_color(self, red, green, blue):
 		self.red = red
@@ -42,13 +46,13 @@ class Bulb(object):
 		self.brightness = brightness
 		self.update_bulb()
 	
-	def dim_to(self, lower_brightness):
+	def dim_to(self, lower_brightness, step=1):
 		while (self.brightness > lower_brightness and self.brightness >= MIN_BRIGHT):
-			self.step_down_brightness()
+			self.step_down_brightness(step)
 
-	def brighten_to(self, higher_brightness):
+	def brighten_to(self, higher_brightness, step=1):
 		while (self.brightness < higher_brightness and self.brightness <= MAX_BRIGHT):
-			self.step_up_brightness()
+			self.step_up_brightness(step)
 
 	def fade_blue_to(self, lower_blue):
 		while (self.blue > lower_blue and self.blue >= MIN_COLOR):
@@ -77,50 +81,50 @@ class Bulb(object):
 
 	# Step values up or down by one
 
-	def step_down_brightness(self):
-		self.brightness = self.brightness - 1
+	def step_down_brightness(self, amount=1):
+		self.brightness = self.brightness - amount
 		if self.brightness < MIN_BRIGHT:
 			self.brightness = MIN_BRIGHT
 		self.update_bulb()
 
-	def step_up_brightness(self):
-		self.brightness = self.brightness + 1
+	def step_up_brightness(self, amount=1):
+		self.brightness = self.brightness + amount
 		if self.brightness > MAX_BRIGHT:
 			self.brightness = MAX_BRIGHT
 		self.update_bulb()
 
-	def step_down_red(self):
-		self.red = self.red - 1
+	def step_down_red(self, amount=1):
+		self.red = self.red - amount
 		if self.red < MIN_COLOR:
 			self.red = MIN_COLOR
 		self.update_bulb()
-
-	def step_up_red(self):
-		self.red = self.red + 1
+	
+	def step_up_red(self, amount=1):	
+		self.red = self.red + amount
 		if self.red > MAX_COLOR:
 			self.red = MAX_COLOR
 		self.update_bulb()
 
-	def step_down_green(self):
-		self.green = self.green - 1
+	def step_down_green(self, amount=1):
+		self.green = self.green - amount
 		if self.green < MIN_COLOR:
 			self.green = MIN_COLOR
 		self.update_bulb()
 
-	def step_up_green(self):
-		self.green = self.green + 1
+	def step_up_green(self, amount=1):
+		self.green = self.green + amount
 		if self.green > MAX_COLOR:
 			self.green = MAX_COLOR
 		self.update_bulb()
 
-	def step_down_blue(self):
-		self.blue = self.blue - 1
+	def step_down_blue(self, amount=1):
+		self.blue = self.blue - amount
 		if self.blue < MIN_COLOR:
 			self.blue = MIN_COLOR
 		self.update_bulb()
 
-	def step_up_blue(self):
-		self.blue = self.blue + 1
+	def step_up_blue(self, amount=1):
+		self.blue = self.blue + amount
 		if self.blue > MAX_COLOR:
 			self.blue = MAX_COLOR
 		self.update_bulb()
