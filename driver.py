@@ -70,3 +70,6 @@ if __name__=="__main__":
     d = Driver([-1, 1], [0, 1], True)
     d.write_led(0, 200, 15, 0, 0)
     d.write_led(99, 200, 0, 0, 15)
+    for led_id in range(100):
+        d.write_led(led_id, 200, 13, 0, 13)
+        sleep(0.05)
