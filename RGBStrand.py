@@ -14,35 +14,35 @@ class RGBStrand(object):
 		for id in range(num_bulbs):
 			self.bulbs.append(b.Bulb(id))
 
-	def set_bulb_color(id, red, green, blue):
+	def set_bulb_color(self, id, red, green, blue):
 		self.bulbs[id].set_color(red, green, blue)
 	
-	def set_bulb_brightness(id, brightness):
+	def set_bulb_brightness(self, id, brightness):
 		self.bulbs[id].set_brightness(brightness)
 
-	def set_strand_color(red, green, blue):
+	def set_strand_color(self, red, green, blue):
 		for id in range(self.num_bulbs):
 			set_bulb_color(id, red, green, blue)
 
-	def set_strand_brightness(brightness):
+	def set_strand_brightness(self, brightness):
 		for id in range(self.num_bulbs):
 			set_bulb_brightness(id, brightness)
 
-	def dim_bulb_to(id, lower_brightness):
+	def dim_bulb_to(self, id, lower_brightness):
 		self.bulbs[id].dim_to(lower_brightness)
 
-	def brighten_bulb_to(id, higher_brightness):
+	def brighten_bulb_to(self, id, higher_brightness):
 		self.bulbs[id].brighten_to(higher_brightness)
 
-	def dim_strand(lower_brightness, mod):
+	def dim_strand(self, lower_brightness, mod):
 		for id in range(self.num_bulbs):
 			dim_bulb_to(id, lower_brightness)
 
-	def brighten_strand(higher_brightness, mod):
+	def brighten_strand(self, higher_brightness, mod):
 		for id in range(self.num_bulbs):
 			brighten_bulb_to(id, higher_brightness)
 
-	def fade_bulb_color(id, channel, lower_val):
+	def fade_bulb_color(self, id, channel, lower_val):
 		if (channel == 'r'):
 			self.bulbs[id].fade_red_to(lower_val)
 		elif (channel == 'g'):
@@ -52,7 +52,7 @@ class RGBStrand(object):
 		else:
 			print "Not a valid channel. Choose from r, g, or b."
 
-	def saturate_bulb_color(id, channel, higher_val):
+	def saturate_bulb_color(self, id, channel, higher_val):
 		if (channel == 'r'):
 			self.bulbs[id].saturate_red_to(lower_val)
 		elif (channel == 'g'):
@@ -62,11 +62,11 @@ class RGBStrand(object):
 		else:
 			print "Not a valid channel. Choose from r, g, or b."
 
-	def fade_strand_color(channel, lower_val, mod = 1):
+	def fade_strand_color(self, channel, lower_val, mod = 1):
 		for id in range(0, self.num_bulbs, mod):
 			fade_bulb_color(id, channel, lower_val)	
 
-	def saturate_strand_color(channel, higher_val, mod = 1):
+	def saturate_strand_color(self, channel, higher_val, mod = 1):
 		for id in range(0, self.num_bulbs, mod):
 			saturate_bulb_color(id, channel, lower_val)	
 
@@ -74,8 +74,8 @@ class RGBStrand(object):
 
 #	def move_right():
 
-	def turn_off():
+	def turn_off(self):
 		set_strand_brightness(0)
 
-	def turn_on():
+	def turn_on(self):
 		set_strand_brightness(MAX_BRIGHT)
