@@ -2,7 +2,7 @@
 
 
 import sys
-import Bulb as b
+import bulb
 import driver
 
 BROADCAST = -1
@@ -16,8 +16,8 @@ class RGBStrand(object):
 		self.num_bulbs = num_bulbs	
 		self.bulbs = []
 		for id in range(num_bulbs):
-			self.bulbs.append(b.Bulb(id, d))
-		self.broadcast = b.Bulb(BROADCAST, d)
+			self.bulbs.append(bulb.Bulb(id, d))
+		self.broadcast = bulb.Bulb(BROADCAST, d)
 
 	# Individual bulb commands	
 
