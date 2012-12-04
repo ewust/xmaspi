@@ -67,7 +67,8 @@ class BinaryShifter(RGBStrands):
             self.bit_offset %= (len(self.text)*8)
             self.bit_offset -= len(self.lights)
             self.lights[0] = (0, 0, 0, 0)
-
+            return False
+        return True
 
 
 if __name__=="__main__":
