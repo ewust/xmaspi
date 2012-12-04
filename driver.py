@@ -68,6 +68,7 @@ class Driver(object):
 if __name__=="__main__":
     # Test
     import time
+    import sys
     d = Driver([-1, 1], [0, 1], len(sys.argv)==1)
 
     if len(sys.argv) == 1:
