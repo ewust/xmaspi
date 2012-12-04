@@ -56,10 +56,14 @@ class Driver(object):
 
 
     def write_led(self, led_id, brightness, green, blue, red):
-        # get physical address
-        self.send_pkt(self.get_physical_addr(led_id), brightness, green, blue, red)
-    
 
+        if led_id == -1:
+            # Broadcast
+            for s in range(self.num_strands):
+                self.send_pkt((s, 63), brightness, 0, 0, 0)
+        else:
+            # Unicast
+            self.send_pkt(self.get_physical_addr(led_id), brightness, green, blue, red)
 
 if __name__=="__main__":
     # Test
