@@ -3,45 +3,21 @@
 
 import time
 import sys
-
-NUM_STRANDS=1
-
-def send_pkt(addr, brightness, green, blue, red, strand=0):
-    f = open('/dev/xmas', 'w')
-    f.write(chr((strand << 6) | addr) + chr(brightness) + chr(green) + chr(blue) + chr(red))
-    f.close()
-
-#initialize
-def init_lights(strand=0):
-    for addr in range(50):
-        send_pkt(addr, 0, 0, 0, 0, strand)
-
-
-
-for s in range(NUM_STRANDS):
-    init_lights(s)
-
-
+import driver
 
 
 class RGBStrands(object):
 
     def __init__(self):
         # brightness, green, blue, red
-        self.lights = [(0, 0, 0, 0)]*(50*NUM_STRANDS)
+        self.lights = [(0, 0, 0, 0)]*(50*driver.Driver().num_strands)
 
     def update_pattern(self):
         addr = 0
         strand = 0
         for x in self.lights:
-            send_pkt(addr, x[0], x[1], x[2], x[3], strand)
-            
+            driver.Driver().write_led(addr, x[0], x[1], x[2], x[3]) 
             addr += 1
-            if addr == 50:
-                addr = 0
-                strand += 1
-
-
 
     
 class BinaryShifter(RGBStrands):
@@ -92,16 +68,14 @@ class BinaryShifter(RGBStrands):
             self.bit_offset -= len(self.lights)
             self.lights[0] = (0, 0, 0, 0)
 
-        
 
 
-s = sys.stdin.read()
-bs = BinaryShifter(s)
-while True:
-    bs.update_pattern()
-    bs.shift()
-    time.sleep(1)
-
-
-
+if __name__=="__main__":
+    d = driver.Driver()
+    s = sys.stdin.read()
+    bs = BinaryShifter(s)
+    while True:
+        bs.update_pattern()
+        bs.shift()
+        time.sleep(1) 
 
