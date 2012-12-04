@@ -61,6 +61,6 @@ class Driver(object):
 
 if __name__=="__main__":
     # Test
-    d = Driver(2, [-1, 1], [0, 1])
+    d = Driver(2, [-1, 1], [0, 1], True)
     d.write_led(0, 200, 15, 0, 0)
     d.write_led(99, 200, 0, 0, 15)
