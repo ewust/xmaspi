@@ -12,7 +12,8 @@ static ssize_t xmas_write(struct file *, const char *, size_t, loff_t *);
 
 static int xmas_major;
 #define DEVICE_NAME "xmas"
-#define XMAS_OUT 17 // TODO: make this a module param
+#define XMAS_OUT_0 17 // TODO: make this a module param
+#define XMAS_OUT_1 18
 
 /* Functions for character device */
 struct file_operations xmas_fops = {
@@ -39,7 +40,8 @@ int init_module()
     printk("Registered char device %d\n", xmas_major);
 
     /* Initialize GPIO */
-    gpio_direction_output(XMAS_OUT, 0);
+    gpio_direction_output(XMAS_OUT_0, 0);
+    gpio_direction_output(XMAS_OUT_1, 0);
 
     return 0;
 }
@@ -64,7 +66,10 @@ xmas_write(struct file *filp, const char *in_buf, size_t len, loff_t * off)
 
         copy_from_user(cur_buf, buf, 5);
 
-
+        unsigned int gpio_pin = XMAS_OUT_0;
+        if (cur_buf[0] & 0x40) {
+            gpio_pin = XMAS_OUT_1;
+        }
         /* 6 bits address
          * 8 bits brightness
          * 4 bits blue
@@ -82,28 +87,28 @@ xmas_write(struct file *filp, const char *in_buf, size_t len, loff_t * off)
         local_irq_disable();
 
         /* High bit for 10us */
-        gpio_set_value(XMAS_OUT, 1);
+        gpio_set_value(gpio_pin, 1);
         udelay(10);
 
         int i;
         for (i=25; i>=0; i--) {
             if (output & (1 << i)) {
                 // High
-                gpio_set_value(XMAS_OUT, 0);
+                gpio_set_value(gpio_pin, 0);
                 udelay(20);
-                gpio_set_value(XMAS_OUT, 1);
+                gpio_set_value(gpio_pin, 1);
                 udelay(10);
             } else {
                 // Low
-                gpio_set_value(XMAS_OUT, 0);
+                gpio_set_value(gpio_pin, 0);
                 udelay(10);
-                gpio_set_value(XMAS_OUT, 1);
+                gpio_set_value(gpio_pin, 1);
                 udelay(20);
             }
         }
 
         /* Set back to idle */
-        gpio_set_value(XMAS_OUT, 0);
+        gpio_set_value(gpio_pin, 0);
 
         local_irq_enable();
 
