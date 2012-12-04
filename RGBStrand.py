@@ -4,6 +4,8 @@
 import sys
 import Bulb as b
 
+BROADCAST = 63
+
 class RGBStrand(object):
 
 	def __init__(self, num_bulbs = None):
@@ -13,6 +15,9 @@ class RGBStrand(object):
 		self.bulbs = []
 		for id in range(num_bulbs):
 			self.bulbs.append(b.Bulb(id))
+		self.broadcast = b.Bulb(BROADCAST)
+
+	# Individual bulb commands	
 
 	def set_bulb_color(self, id, red, green, blue):
 		self.bulbs[id].set_color(red, green, blue)
@@ -20,28 +25,47 @@ class RGBStrand(object):
 	def set_bulb_brightness(self, id, brightness):
 		self.bulbs[id].set_brightness(brightness)
 
+	def brighten_bulb_to(self, id, higher_brightness, rate=1):
+		self.bulbs[id].brighten_to(higher_brightness, rate)
+
+	def dim_bulb_to(self, id, lower_brightness, rate=1):
+		self.bulbs[id].dim_to(lower_brightness, rate)
+
+	# Synchronized strand commands
+	
 	def set_strand_color(self, red, green, blue):
-		for id in range(self.num_bulbs):
-			set_bulb_color(id, red, green, blue)
+		self.broadcast.set_color(red, green, blue)
 
 	def set_strand_brightness(self, brightness):
-		for id in range(self.num_bulbs):
+		self.broadcast.set_brightness(brightness)
+	
+	def brighten_strand(self, higher_brightness, rate=1):
+		self.broadcast.brighten_to(higher_brightness, rate)
+	
+	def dim_strand(self, lower_brightness, rate=1):
+		self.broadcast.dim_to(lower_brightness, rate)
+
+	# Cascading commands, can do every mod 	
+
+	def cascading_strand_color(self, red, green, blue, mod=1):
+		for id in range(0, self.num_bulbs, mod):
+			set_bulb_color(id, red, green, blue)
+
+	def cascading_strand_brightness(self, brightness, mod=1):
+		for id in range(0, self.num_bulbs, mod):
 			set_bulb_brightness(id, brightness)
 
-	def dim_bulb_to(self, id, lower_brightness):
-		self.bulbs[id].dim_to(lower_brightness)
+	def cascading_dim_strand(self, lower_brightness, rate=1, mod=1):
+		for id in range(0, self.num_bulbs, mod):
+			self.dim_bulb_to(id, lower_brightness, rate)
 
-	def brighten_bulb_to(self, id, higher_brightness):
-		self.bulbs[id].brighten_to(higher_brightness)
+	def cascading_brighten_strand(self, higher_brightness, rate=1, mod=1):
+		for id in range(0, self.num_bulbs, mod):
+			self.brighten_bulb_to(id, higher_brightness, rate)
 
-	def dim_strand(self, lower_brightness, mod):
-		for id in range(self.num_bulbs):
-			self.dim_bulb_to(id, lower_brightness)
 
-	def brighten_strand(self, higher_brightness, mod):
-		for id in range(self.num_bulbs):
-			self.brighten_bulb_to(id, higher_brightness)
-
+# Smooth transitions between colors not happening for some reason 
+"""
 	def fade_bulb_color(self, id, channel, lower_val):
 		if (channel == 'r'):
 			self.bulbs[id].fade_red_to(lower_val)
@@ -69,6 +93,7 @@ class RGBStrand(object):
 	def saturate_strand_color(self, channel, higher_val, mod = 1):
 		for id in range(0, self.num_bulbs, mod):
 			self.saturate_bulb_color(id, channel, lower_val)	
+"""
 
 #	def move_left():
 
