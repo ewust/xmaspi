@@ -63,8 +63,7 @@ class BinaryShifter(RGBStrands):
 
     def shift(self, num_spaces=1):
         self.bit_offset += num_spaces
-        print '%d out of %d (%d)' % (self.bit_offset, len(self.text)*8, len(self.lights))
-        if self.bit_offset >= len(self.text)*8:
+        if self.bit_offset >= len(self.text)*9:
             self.bit_offset %= (len(self.text)*8)
             self.bit_offset -= len(self.lights)
             self.lights[0] = (0, 0, 0, 0)
@@ -78,5 +77,5 @@ if __name__=="__main__":
     while True:
         bs.update_pattern()
         bs.shift()
-        time.sleep(1) 
+        time.sleep(.1) 
 
