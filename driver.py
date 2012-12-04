@@ -5,10 +5,17 @@ STRAND_LEN = 50
 # Keeps a mapping between LED Ids (0-N*50) to (strand, addr) pairs
 class Driver(object):
 
+    obj = None
+
     # Strand orientations are arrays of either 1 or -1,
     # for each strand.
     # A strand with a -1 orientation will address 
-    def __init__(self, strand_orientations=None, strand_order=None, do_init=False):
+    def __init__(self, strand_orientations=[-1, 1], \
+                 strand_order=[0, 1], do_init=False):
+        if Driver.obj:
+            return Driver.obj
+
+        Driver.obj = self
         self.num_strands = 1
         if strand_orientations != None:
             self.num_strands = len(strand_orientations)
