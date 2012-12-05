@@ -62,6 +62,9 @@ int init_module()
 
 void cleanup_module()
 {
+    gpio_free(XMAS_OUT_0);
+    gpio_free(XMAS_OUT_1);
+
     unregister_chrdev(xmas_major, DEVICE_NAME);
 
     printk("Unloaded xmas\n");
