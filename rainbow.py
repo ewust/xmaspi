@@ -8,8 +8,6 @@ colors = [(15, 0, 0), \
 (4,  14, 13), \
 (14, 8, 14) ]
 
-for 
-
 import rgb_strand
 
 NUM_BULBS = 100
