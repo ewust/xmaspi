@@ -37,7 +37,7 @@ if __name__ == '__main__':
     bs = binary.BinaryShifter('Tweet me!')
 
     while True:
-        results = api.search(q='#basketball', rpp=5, result_type='recent')
+        results = api.search(q='#cseblinkenlights', rpp=1, result_type='recent')
         bs.update_text(results[0].text)
  
         while bs.shift():       
