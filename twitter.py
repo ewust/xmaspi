@@ -38,7 +38,8 @@ if __name__ == '__main__':
 
     while True:
         results = api.search(q='#cseblinkenlights', rpp=1, result_type='recent')
-        bs.update_text(results[0].text)
+        if len(results) > 0:
+            bs.update_text(results[0].text)
  
         while bs.shift():       
             bs.update_pattern()
