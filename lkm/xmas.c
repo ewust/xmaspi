@@ -40,6 +40,9 @@ int init_module()
     printk("Registered char device %d\n", xmas_major);
 
     /* Initialize GPIO */
+    gpio_request(XMAS_OUT_0, "xmas");
+    gpio_request(XMAS_OUT_1, "xmas");
+
     gpio_direction_output(XMAS_OUT_0, 0);
     gpio_direction_output(XMAS_OUT_1, 0);
 
