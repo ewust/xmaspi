@@ -72,7 +72,7 @@ class RGBStrand(object):
 	def set_strand_pattern(self, color_array):
 		for i in range(self.num_bulbs):
 			rgb = color_array[i % len(color_array)]
-			self.set_bulb_color(rgb[0], rgb[1], rgb[2])
+			self.set_bulb_color(i, rgb[0], rgb[1], rgb[2])
 
 
 # Smooth transitions between colors not happening for some reason 
