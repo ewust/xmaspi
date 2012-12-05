@@ -40,8 +40,18 @@ int init_module()
     printk("Registered char device %d\n", xmas_major);
 
     /* Initialize GPIO */
-    gpio_request(XMAS_OUT_0, "xmas");
-    gpio_request(XMAS_OUT_1, "xmas");
+    int status;
+    status = gpio_request(XMAS_OUT_0, "xmas");
+    if (status) {
+        printk(KERN_ALERT "gpio_request for GPIO %d failed with %d\n",
+                XMAS_OUT_0, status);
+    }
+    
+    status = gpio_request(XMAS_OUT_1, "xmas");
+    if (status) {
+        printk(KERN_ALERT "gpio_request for GPIO %d failed with %d\n",
+                XMAS_OUT_1, status);
+    }
 
     gpio_direction_output(XMAS_OUT_0, 0);
     gpio_direction_output(XMAS_OUT_1, 0);
