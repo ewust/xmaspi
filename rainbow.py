@@ -13,5 +13,5 @@ import rgb_strand
 NUM_BULBS = 100
 
 strand = rgb_strand.RGBStrand(NUM_BULBS)
-strand.set_bulb_pattern(colors)
+strand.set_strand_pattern(colors)
 strand.set_strand_brightness(200)
