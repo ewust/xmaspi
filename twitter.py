@@ -171,6 +171,7 @@ def func(lock):
             # just run rainbow i guess
             print 'no tweets'
             lock.release()
+            time.sleep(3)
             continue
         
         lock.release()
