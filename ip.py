@@ -23,14 +23,14 @@ def get_interface_ip(ifname):
 out_str = ''
 try:
     wlan_ip = get_interface_ip('wlan1')
-    print socket.inet_aton(wlan_ip)
+    print socket.inet_ntoa(wlan_ip)
     out_str = wlan_ip + '\x00'
 except:
     print 'uh oh' 
 
 try:
     eth0_ip = get_interface_ip('eth0')
-    print socket.inet_aton(eth0_ip)
+    print socket.inet_ntoa(eth0_ip)
     out_str += eth0_ip + '\x00' 
 except:
     print 'meh'
