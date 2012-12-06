@@ -56,11 +56,9 @@ def handle_rainbow():
     strand.set_strand_pattern(colors)
     strand.set_strand_brightness(200)
 
-    i = 0
     for i in range(200):
-        strand.push_top(200, colors[i][0], colors[i][1], colors[i][2])
-        i += 1
-        i %= len(colors)
+        idx = i % len(colors)
+        strand.push_top(200, colors[idx][0], colors[idx][1], colors[idx][2])
 
 
 def handle_binary(text):
