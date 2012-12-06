@@ -33,7 +33,7 @@ def get_last_max_id():
 
 def put_last_max_id(mid):
     f = open(MAX_MENTION_FILE, 'w')
-    f.write(str(mid))
+    f.write(str(mid)+'\n')
     f.close()
 
 def handle_ip():
@@ -82,7 +82,7 @@ def handle_color(color):
 def handle_new_mention(mention):
 
     tweet = str(mention.text).strip()
-    sys.stdout.write('%s: \'%s\': ' % (mention.user, tweet))
+    sys.stdout.write('%s: \'%s\': ' % (mention.user.screen_name, tweet))
     if tweet.lower().startswith('@bbb_blinken '):
         cmd = tweet[len('@bbb_blinken '):]
 
