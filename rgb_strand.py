@@ -104,12 +104,12 @@ class RGBStrand(object):
 		for id in range(0, self.num_bulbs, mod):
 			self.saturate_bulb_color(id, channel, lower_val)	
 
-	def scroll_back():
+	def scroll_back(self):
 		for id in reversed(range(1,self.num_bulbs)):
 			b = self.bulbs[id]
 			self.set_bulb_attributes(id-1, b.brightness, b.red, b.green, b.blue)
 
-	def scroll_forward():
+	def scroll_forward(self):
 		for id in reversed(range(0,self.num_bulbs-1)):
 			b = self.bulbs[id]
 			self.set_bulb_attributes(id+1, b.brightness, b.red, b.green, b.blue)
