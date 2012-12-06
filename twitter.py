@@ -41,7 +41,25 @@ def handle_ip():
 
 
 def handle_rainbow():
-    
+    colors = [(15, 0, 0), \
+            (15, 3, 0), \
+            (15, 15, 0), \
+            (0,   15,   0), \
+            (0,   0, 15), \
+            (4,  14, 13), \
+            (14, 0, 14) ]
+
+
+    strand = rgb_strand.RGBStrand(NUM_BULBS)
+    strand.set_strand_pattern(colors)
+    strand.set_strand_brightness(200)
+
+    i = 0
+    for i in range(200):
+        strand.push_top(200, colors[i][0], colors[i][1], colors[i][2])
+        i += 1
+        i %= len(colors)
+
 
 def handle_binary(text):
     
