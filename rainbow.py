@@ -17,8 +17,10 @@ strand = rgb_strand.RGBStrand(NUM_BULBS)
 strand.set_strand_pattern(colors)
 strand.set_strand_brightness(200)
 
+i = 0
 while True:
-    strand.scroll_forward()
-    time.sleep(0.1)
+    strand.push_top(colors[i])
+    i += 1
+    i %= len(colors)
 
 
