@@ -28,7 +28,7 @@ class Bulb(object):
 		self.driver = driver
 
 	def update_bulb(self):
-		self.driver.write_led(self.id, self.brightness, self.green, self.blue, self.red)
+		self.driver.write_led(self.id, self.brightness, self.blue, self.green, self.red)
 	
 	# Directly set values
 
