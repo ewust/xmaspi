@@ -84,14 +84,12 @@ Looking forward to your creations! :)
 
 			while True:
 				if time.time() - start > 30:
-					glock.release()
 					print "User " + name + " timed out"
 					self.request.sendall("Time's up!\\0")
 					return
 				resp = self.request.recv(5, socket.MSG_WAITALL)
 				#print "got (len %d) >>>%s<<<" % (len(resp), resp)
 				if len(resp) == 0:
-					glock.release()
 					print "User " + name + " closed connection"
 					return
 				id, bri, red, grn, blu = struct.unpack("BBBBB", resp)
