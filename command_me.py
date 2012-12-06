@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import sys
 import time
 import struct
 import socket
@@ -15,7 +16,8 @@ global glock
 class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
 	def handle(self):
 		global glock
-		d = driver.Driver()
+		if len(sys.argv) == 1:
+			d = driver.Driver()
 
 		self.request.settimeout(1)
 
@@ -41,7 +43,7 @@ Once you're ready to control the strand, send the 9 bytes
 back to me. I'll enqueue you to control the strand. When it's your
 turn, I'll send you the 9 bytes
   >>>Go Time!\\0<<<
-This will start a 10 second timer. During your 10 seconds, I'll forward
+This will start a 30 second timer. During your 30 seconds, I'll forward
 every command you send directly to the strand.
 
 Controlling the bulbs is a 5-byte tuple:
@@ -52,7 +54,7 @@ Controlling the bulbs is a 5-byte tuple:
  blue [0-15]
 
 You don't need any form of control characters between bulb tuples (no \\0
-or anything like that). If you want to give up the strand before your 10
+or anything like that). If you want to give up the strand before your 30
 seconds runs out, just close the connection.
 
 Looking forward to your creations! :)
@@ -73,7 +75,7 @@ Looking forward to your creations! :)
 			start = time.time()
 
 			while True:
-				if time.time() - start > 10:
+				if time.time() - start > 30:
 					glock.release()
 					print "User " + name + " timed out"
 					self.request.sendall("Time's up!\\0")
@@ -86,12 +88,15 @@ Looking forward to your creations! :)
 					return
 				id, bri, red, grn, blu = struct.unpack("BBBBB", resp)
 				if id > 99 or grn > 15 or blu > 15 or red > 15:
-					#print "Invalid parameter, skipping message"
-					#print "bulb %d brightness %d RGB %d %d %d" % (id, bri, red, grn, blu)
+					if len(sys.argv) > 1:
+						print "Invalid parameter, skipping message"
+						print "bulb %d brightness %d RGB %d %d %d" % (id, bri, red, grn, blu)
 					self.request.sendall("Invalid parameter, skipped\\0")
 					continue
-				d.write_led(id, bri, blu, grn, red)
-				#print "Would set bulb %d to brightness %d with RGB %d %d %d" % (id, bri, red, grn, blu)
+				if len(sys.argv) == 1:
+					d.write_led(id, bri, blu, grn, red)
+				else:
+					print "Would set bulb %d to brightness %d with RGB %d %d %d" % (id, bri, red, grn, blu)
 		except:
 			glock.release()
 			print "User " + name + " threw an exception"
