@@ -7,6 +7,10 @@ import time
 import sys
 import rgb_strand
 import webcolors
+import socket
+import fnctl
+SIOCGIFADDR = 0x8915
+import struct
 from api_keys import *
 
 NUM_BULBS = 100
