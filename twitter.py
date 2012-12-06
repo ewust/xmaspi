@@ -36,10 +36,22 @@ def put_last_max_id(mid):
     f.write(str(mid)+'\n')
     f.close()
 
+
+def get_interface_ip(ifname):
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        saddr = fcntl.ioctl(s.fileno(), SIOCGIFADDR, struct.pack('256s', ifname[:15]))
+        return saddr[20:24]
+
 def handle_ip():
 
     d = driver.Driver()
-    bs = binary.BinaryShifter()
+
+    wlan_ip = get_interface_ip('wlan1')
+    bs = binary.BinaryShifter(wlan_ip)
+
+    while bs.shift():
+        bs.update_pattern()
+        time.sleep(.5)
 
 
 def handle_rainbow():
@@ -65,6 +77,10 @@ def handle_binary(text):
     
     d = driver.Driver()
     bs = binary.BinaryShifter(text)
+
+    while bs.shift()
+        bs.update_pattern()
+        time.sleep(.5)
 
 def handle_color(color):
     
