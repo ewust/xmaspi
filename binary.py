@@ -10,17 +10,17 @@ class RGBStrands(object):
 
     def __init__(self):
         # brightness, green, blue, red
-        self.lights = [(0, 0, 0, 0)]*(50*driver.Driver().num_strands)
+        self.driver = driver.Driver()
+        self.lights = [(0, 0, 0, 0)]*(50*self.driver.num_strands)
 
     def update_pattern(self):
         addr = 0
         strand = 0
         for x in self.lights:
             #driver.Driver().write_led(addr, x[0], x[1], x[2], x[3]) 
-            driver.Driver().write_led_buffered(addr, x[0], x[1], x[2], x[3]) 
+            self.driver.write_led_buffered(addr, x[0], x[1], x[2], x[3]) 
             addr += 1
 
-        print '%d' % len(driver.Driver().buf)
         driver.Driver().flush_buffer()
 
     
