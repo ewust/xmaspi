@@ -74,14 +74,15 @@ Looking forward to your creations! :)
 
 			while True:
 				if time.time() - start > 10:
+					glock.release()
 					print "User " + name + " timed out"
 					self.request.sendall("Time's up!\\0")
-					glock.release()
 					return
 				resp = self.request.recv(5, socket.MSG_WAITALL)
 				#print "got (len %d) >>>%s<<<" % (len(resp), resp)
 				if len(resp) == 0:
 					glock.release()
+					print "User " + name + " closed connection"
 					return
 				id, bri, grn, blu, red = struct.unpack("BBBBB", resp)
 				if id > 99 or grn > 15 or blu > 15 or red > 15:
@@ -93,6 +94,7 @@ Looking forward to your creations! :)
 				#print "Would set bulb %d to brightness %d with GBR %d %d %d" % (id, bri, grn, blu, red)
 		except:
 			glock.release()
+			print "User " + name + " threw an exception"
 			return
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
