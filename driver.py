@@ -6,10 +6,14 @@ STRAND_LEN = 50
 class Driver(object):
 
     _instance = None
+    f = None
+    buf = None
     def __new__(cls, *args, **kwargs):
         if not cls._instance:
             cls._instance = super(Driver, cls).__new__(
                                 cls, *args, **kwargs)
+            cls.f = open('/dev/xmas', 'w')
+            cls.buf = ''
         return cls._instance
 
     # Strand orientations are arrays of either 1 or -1,
@@ -17,8 +21,7 @@ class Driver(object):
     # A strand with a -1 orientation will address 
     def __init__(self, strand_orientations=[-1, 1], \
                  strand_order=[0, 1], do_init=False):
-        self.f = open('/dev/xmas', 'w')
-        self.buf = ''
+        
         self.num_strands = 1
         if strand_orientations != None:
             self.num_strands = len(strand_orientations)
