@@ -105,8 +105,10 @@ def handle_new_mention(mention):
             sys.stdout.write('binary(%s)\n' % arg)
             handle_binary(arg)
         else:
+            sys.stdout.write('\n')
             return 0
     else:
+        sys.stdout.write('\n')
         return 0
     return 1
         
