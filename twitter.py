@@ -90,7 +90,7 @@ def handle_new_mention(mention):
 
         elif cmd.lower().startswith('all '):
             color = cmd[len('all '):].lower()
-            handle_all_cmd(color)
+            handle_color(color)
 
         elif cmd.lower().startswith('rainbow'):
             handle_rainbow()
