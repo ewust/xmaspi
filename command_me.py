@@ -35,6 +35,12 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
 		finally:
 			print 'Got %d byte name >>>%s<<<' % (len(name), name)
 
+		name = name[:-1]
+		if len(name) == 0:
+			self.request.sendall("I won't talk to you if you don't tell me who you are.\n")
+			self.request.sendall("Try sending a name next time. Goodbye.\n")
+			return
+
 		print "Request from", name
 		# parse
 		self.request.sendall("Hi " + name + "\n")
