@@ -134,7 +134,7 @@ def handle_new_mention(lock, api, mention):
             else:
                 sys.stdout.write('\n')
                 sys.stdout.write('[unknown cmd, did nothing]')
-                api.update_status("I don't know that one @%s. Maybe you should hack it for me ;)" % (mention.user.screen_name), mention.id)
+                api.update_status("I don't know that one @%s. Maybe you should hack it for me ;)   http://t.co/WMWzUQiR" % (mention.user.screen_name), mention.id)
         else:
             sys.stdout.write('\n')
             sys.stdout.write('[tweet did not start with @bbb_blinken, did nothing]')
