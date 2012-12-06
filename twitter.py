@@ -167,6 +167,7 @@ def func(lock):
                 if num_mentions_run > 0:
                     # given someone else a shot at running
                     lock.release()
+                    time.sleep(1)
                     lock.acquire()
             
      
