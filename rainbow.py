@@ -19,7 +19,7 @@ strand.set_strand_brightness(200)
 
 i = 0
 while True:
-    strand.push_top(colors[i])
+    strand.push_top(200, colors[i][0], colors[i][1], colors[i][2])
     i += 1
     i %= len(colors)
 
