@@ -147,7 +147,15 @@ def func(lock):
         lock.acquire()
         round_max_id = max_id
         num_mentions_run = 0
-        mentions = api.mentions()
+        try:
+            mentions = api.mentions()
+        except:
+            cur_time = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
+            print '%s Twitter blocked me, sleeping for a while' % cur_time 
+
+            lock.release()
+            time.sleep(300)
+            continue
 
         print 'handling %d mentions...' % len(mentions)
         for mention in mentions:
@@ -171,6 +179,7 @@ def func(lock):
             # just run rainbow i guess
             print 'no tweets'
             lock.release()
+            time.sleep(3)
             continue
         
         lock.release()
@@ -185,7 +194,7 @@ def func(lock):
  
         while bs.shift():       
             bs.update_pattern()
-            time.sleep(1)
+            time.sleep(20)
     sys.exit(0)
 
 if __name__=="__main__":

@@ -22,15 +22,13 @@ def func(lock):
 
     i = 0
     while True:
-        strand.push_top(200, colors[idx][0], colors[idx][1], colors[idx][2])
+        strand.push_top(200, colors[i][0], colors[i][1], colors[i][2])
         i += 1
         i %= len(colors)
 
         # Let other people use it if they want it
         lock.release()
         lock.acquire()
-
-
 
 
 if __name__=="__main__":
