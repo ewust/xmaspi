@@ -33,7 +33,7 @@ def get_last_max_id():
 
 def put_last_max_id(mid):
     f = open(MAX_MENTION_FILE, 'w')
-    f.write(str(mid))
+    f.write(str(mid)+'\n')
     f.close()
 
 def handle_ip():
@@ -82,31 +82,36 @@ def handle_color(color):
 def handle_new_mention(mention):
 
     tweet = str(mention.text).strip()
+    sys.stdout.write('%s: \'%s\': ' % (mention.user.screen_name, tweet))
     if tweet.lower().startswith('@bbb_blinken '):
         cmd = tweet[len('@bbb_blinken '):]
 
         if cmd.lower().startswith('ip'):
+            sys.stdout.write('ip\n')
             handle_ip()
 
         elif cmd.lower().startswith('all '):
             color = cmd[len('all '):].lower()
+            sys.stdout.write('color(%s)\n' % color)
             handle_color(color)
 
         elif cmd.lower().startswith('rainbow'):
+            sys.stdout.write('running rainbow\n')
             handle_rainbow()
         
         elif cmd.lower().startswith('binary '):
             arg = cmd[len('binary '):]
+            sys.stdout.write('binary(%s)\n' % arg)
             handle_binary(arg)
         
 
-if __name__ == '__main__':
 
-    l = StdOutListener()
+def func():
+
+    #l = StdOutListener()
     a = tweepy.OAuthHandler(consumer_key, consumer_secret)
     a.set_access_token(access_token, access_token_secret)
     api = tweepy.API(a)
-
 
     max_id = get_last_max_id()
 
@@ -116,8 +121,9 @@ if __name__ == '__main__':
         if len(mentions) == 0:
             # No new tweets :(
             # just run rainbow i guess
+            print 'no tweets, running rainbow'
             handle_rainbow()
-            continue
+            return
 
         for mention in mentions:
             if mention.id > max_id:
@@ -127,11 +133,8 @@ if __name__ == '__main__':
      
         put_last_max_id(round_max_id) # in case we die, store our state
         max_id = round_max_id
+        return
 
-
-
-
-    sys.exit(0)
 
     #d = driver.Driver()
     #bs = binary.BinaryShifter('Tweet me!')
@@ -144,3 +147,7 @@ if __name__ == '__main__':
         while bs.shift():       
             bs.update_pattern()
             time.sleep(1)
+    sys.exit(0)
+
+if __name__=="__main__":
+    func()
