@@ -15,7 +15,7 @@ global glock
 class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
 	def handle(self):
 		global glock
-		#d = driver.Driver()
+		d = driver.Driver()
 
 		self.request.settimeout(1)
 
@@ -83,14 +83,14 @@ Looking forward to your creations! :)
 				if len(resp) == 0:
 					glock.release()
 					return
-				id, bri, grn, red, blu = struct.unpack("BBBBB", resp)
-				if id > 99 or grn > 15 or red > 15 or blu > 15:
-					print "Invalid parameter, skipping message"
-					print "bulb %d brightness %d GRB %d %d %d" % (id, bri, grn, red, blu)
+				id, bri, grn, blu, red = struct.unpack("BBBBB", resp)
+				if id > 99 or grn > 15 or blu > 15 or red > 15:
+					#print "Invalid parameter, skipping message"
+					#print "bulb %d brightness %d GBR %d %d %d" % (id, bri, grn, blu, red)
 					self.request.sendall("Invalid parameter, skipped\\0")
 					continue
-				#d.write_led(id, bri, grn, red, blu)
-				print "Would set bulb %d to brightness %d with GRB %d %d %d" % (id, bri, grn, red, blu)
+				d.write_led(id, bri, grn, blu, red)
+				#print "Would set bulb %d to brightness %d with GBR %d %d %d" % (id, bri, grn, blu, red)
 		except:
 			glock.release()
 			return
