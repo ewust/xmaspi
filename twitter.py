@@ -72,6 +72,7 @@ def handle_color(color):
     try:
         rgb = webcolors.name_to_rgb(color)
         strand.set_strand_color(rgb[0]/16, rgb[1]/16, rgb[2]/16)
+        time.sleep(10)
         # respond to user?
     except:
         # Shame user?
@@ -114,7 +115,7 @@ def handle_new_mention(mention):
         
 
 
-def func():
+def func(lock):
 
     #l = StdOutListener()
     a = tweepy.OAuthHandler(consumer_key, consumer_secret)
@@ -124,12 +125,14 @@ def func():
     max_id = get_last_max_id()
 
     while True:
+        lock.acquire()
         round_max_id = 0
         num_mentions_run = 0
         mentions = api.mentions()
 
         for mention in mentions:
             if mention.id > max_id:
+                print 'tweet %d > %d' % (mention.id, max_id)
                 num_mentions_run += handle_new_mention(mention)
                 if mention.id > round_max_id:
                     round_max_id = mention.id
