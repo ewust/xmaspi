@@ -81,7 +81,7 @@ def handle_color(color):
 
 def handle_new_mention(mention):
 
-    tweet = mention.text.strip() 
+    tweet = str(mention.text).strip()
     if tweet.lower().startswith('@bbb_blinken '):
         cmd = tweet[len('@bbb_blinken '):]
 
