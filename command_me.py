@@ -42,10 +42,10 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
 You've found the Bob and Betty Beyster Bright Blinken Bulbs API!
 
 Once you're ready to control the strand, send the 9 bytes
-  >>>let's go\\0<<<
+  >>>let's go\\n<<<
 back to me. I'll enqueue you to control the strand. When it's your
 turn, I'll send you the 9 bytes
-  >>>Go Time!\\0<<<
+  >>>Go Time!\\n<<<
 This will start a 30 second timer. During your 30 seconds, I'll forward
 every command you send directly to the strand. You'll need to send at least
 one packet every second to keep your session alive.
@@ -66,8 +66,8 @@ Looking forward to your creations! :)
 """)
 
 		resp = self.request.recv(9)
-		if resp != "let's go\0":
-			self.request.sendall("I didn't get let's go, I got:\n")
+		if resp != "let's go\n":
+			self.request.sendall("I didn't get let's go\\n, I got:\n")
 			self.request.sendall(resp)
 			print "Didn't get let's go, got:"
 			print ">>>%s<<<" % (resp)
@@ -78,7 +78,7 @@ Looking forward to your creations! :)
 		# Block for controller here
 		glock.acquire()
 		try:
-			self.request.sendall("Go Time!\\0")
+			self.request.sendall("Go Time!\\n")
 
 			start = time.time()
 
