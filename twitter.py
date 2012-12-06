@@ -130,6 +130,7 @@ def func(lock):
         num_mentions_run = 0
         mentions = api.mentions()
 
+        print 'handling %d mentions...' % len(mentions)
         for mention in mentions:
             if mention.id > max_id:
                 print 'tweet %d > %d' % (mention.id, max_id)
