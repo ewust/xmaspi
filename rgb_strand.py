@@ -114,6 +114,14 @@ class RGBStrand(object):
 			b = self.bulbs[id]
 			self.set_bulb_attributes(id+1, b.brightness, b.red, b.green, b.blue)
 
+    def push_top(self, brightness, r, g, b):
+        self.scroll_forward()
+        self.set_bulb_attributes(0, brightness, r, g, b)
+
+    def push_bottom(self, brightness, r, g, b):
+        self.scroll_back()
+        self.set_bulb_attributes(self.num_bulbs-1, brightness, r, g, b)
+
 	def turn_off(self):
 		self.set_strand_brightness(0)
 
