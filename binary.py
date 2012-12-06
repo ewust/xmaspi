@@ -16,8 +16,11 @@ class RGBStrands(object):
         addr = 0
         strand = 0
         for x in self.lights:
-            driver.Driver().write_led(addr, x[0], x[1], x[2], x[3]) 
+            #driver.Driver().write_led(addr, x[0], x[1], x[2], x[3]) 
+            driver.Driver().write_led_buffered(addr, x[0], x[1], x[2], x[3]) 
             addr += 1
+
+        driver.Driver().flush_buffer()
 
     
 class BinaryShifter(RGBStrands):
