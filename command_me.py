@@ -75,7 +75,7 @@ Looking forward to your creations! :)
 		if resp != "let's go\n":
 			self.request.sendall("I didn't get let's go\\n, I got:\n")
 			self.request.sendall(resp)
-			print "Didn't get let's go, got:"
+			print "Didn't get let's go from %s, got:" % (name)
 			print ">>>%s<<<" % (resp)
 			return
 
