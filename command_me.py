@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import sys
+import traceback
 import time
 import struct
 import socket
@@ -100,6 +101,9 @@ Looking forward to your creations! :)
 		except:
 			glock.release()
 			print "User " + name + " threw an exception"
+			print '-'*60
+			traceback.print_exc(file=sys.stdout)
+			print '-'*60
 			return
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
