@@ -21,6 +21,8 @@ class Driver(object):
         if strand_orientations != None:
             self.num_strands = len(strand_orientations)
         self.initialize(strand_orientations, strand_order, do_init)
+    
+        self.f = open('/dev/xmas', 'w')
         pass
 
     # Initialize physical address on the strand
@@ -53,9 +55,8 @@ class Driver(object):
  
 
     def send_pkt(self, phys_addr, brightness, green, blue, red):
-        f = open('/dev/xmas', 'w')
-        f.write(chr((phys_addr[0] << 6) | phys_addr[1]) + chr(brightness) + chr(green) + chr(blue) + chr(red))
-        f.close()
+        self.f.write(chr((phys_addr[0] << 6) | phys_addr[1]) + chr(brightness) + chr(green) + chr(blue) + chr(red))
+        self.f.flush()
 
     # get a physical address tuple from an LED ID
     # returns (strand, addr)
