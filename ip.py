@@ -11,7 +11,7 @@ import struct
 SIOCGIFADDR = 0x8915
 
 d = driver.Driver()
-bs = binary.BinaryStream()
+bs = binary.BinaryShifter()
 
 
 
