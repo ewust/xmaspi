@@ -112,7 +112,14 @@ if __name__ == '__main__':
 
     while True:
         round_max_id = 0
-        for mention in api.mentions():
+        mentions = api.mentions()
+        if len(mentions) == 0:
+            # No new tweets :(
+            # just run rainbow i guess
+            handle_rainbow()
+            continue
+
+        for mention in mentions:
             if mention.id > max_id:
                 handle_new_mention(mention)
                 if mention.id > round_max_id:
