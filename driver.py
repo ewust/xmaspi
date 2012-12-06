@@ -18,6 +18,7 @@ class Driver(object):
     def __init__(self, strand_orientations=[-1, 1], \
                  strand_order=[0, 1], do_init=False):
         self.f = open('/dev/xmas', 'w')
+        self.buf = ''
         self.num_strands = 1
         if strand_orientations != None:
             self.num_strands = len(strand_orientations)
@@ -53,6 +54,13 @@ class Driver(object):
                 addr += orientation
                 led_id += 1
  
+    def buffer_pkt(self, phys_addr, brightness, green, blue, red):
+        self.buf += chr((phys_addr[0] << 6) | phys_addr[1]) + chr(brightness) + chr(green) + chr(blue) + chr(red)
+
+    def flush_buffer(self):
+        self.f.write(self.buf)
+        self.f.flush()
+        self.buf = ''
 
     def send_pkt(self, phys_addr, brightness, green, blue, red):
         self.f.write(chr((phys_addr[0] << 6) | phys_addr[1]) + chr(brightness) + chr(green) + chr(blue) + chr(red))
@@ -62,6 +70,16 @@ class Driver(object):
     # returns (strand, addr)
     def get_physical_addr(self, led_id):
         return self.phys_addr[led_id]
+
+    def write_led_buffered(self, led_id, brightness, green, blue, red):
+        
+        if led_id == -1:
+            # Broadcast
+            for s in range(self.num_strands):
+                self.buffer_pkt((s, 63), brightness, 0, 0, 0)
+        else:
+            # Unicast
+            self.buffer_pkt(self.get_physical_addr(led_id), brightness, green, blue, red)
 
 
     def write_led(self, led_id, brightness, green, blue, red):
