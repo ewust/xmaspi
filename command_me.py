@@ -20,16 +20,23 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
 		if len(sys.argv) == 1:
 			d = driver.Driver()
 
-		name = self.request.recv(1)
-		while True:
-			if name[-1] == '\0':
-				break
-			elif name[-1] == '\n':
-				self.request.sendall("I don't like newlines.\r\n")
-				return
-			elif len(name) == 16:
-				return
-			name += self.request.recv(1)
+		try:
+			name = self.request.recv(1)
+			while True:
+				if name[-1] == '\0':
+					break
+				elif name[-1] == '\n':
+					self.request.sendall("I don't like newlines.\r\n")
+					return
+				elif len(name) == 16:
+					return
+				resp = self.request.recv(1)
+				if len(resp):
+					name += resp
+				else:
+					return
+		finally:
+			print 'Got %d byte name >>>%s<<<' % (len(name), name)
 
 		print "Request from", name
 		# parse
