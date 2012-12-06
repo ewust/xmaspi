@@ -141,6 +141,7 @@ def handle_new_mention(lock, mention):
 
 
 def func(lock):
+    print "Spawning twitter..."
 
     #l = StdOutListener()
     a = tweepy.OAuthHandler(consumer_key, consumer_secret)

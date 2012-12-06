@@ -117,7 +117,9 @@ Looking forward to your creations! :)
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
 	pass
 
-def command_me(lock):
+def func(lock):
+	print "Spawning command_me..."
+
 	HOST, PORT = "0.0.0.0", 4908
 
 	global glock
@@ -128,4 +130,4 @@ def command_me(lock):
 
 if __name__ == '__main__':
 	lock = Lock()
-	Process(target=command_me, args=(lock,)).start()
+	Process(target=func, args=(lock,)).start()

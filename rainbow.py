@@ -8,6 +8,8 @@ import rgb_strand
 NUM_BULBS = 100
 
 def func(lock):
+    print "Spawning rainbow..."
+
     colors = [(15, 0, 0), \
             (15, 3, 0), \
             (15, 15, 0), \

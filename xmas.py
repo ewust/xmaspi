@@ -7,12 +7,15 @@ import rainbow
 
 def main():
 	l = Lock()
-	p_command_me = Process(target=command_me.command_me, args=(l,))
+	p_command_me = Process(target=command_me.func, args=(l,))
 	p_ewust = Process(target=twitter.func,args=(l,))
 	p_rainbow = Process(target=rainbow.func, args=(l,))
 	p_command_me.start()
 	p_ewust.start()
 	p_rainbow.start()
+
+	print 'All process start()\'s invoked'
+
 	p_command_me.join()
 	p_ewust.join()
 	p_rainbow.join()
