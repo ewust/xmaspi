@@ -98,11 +98,17 @@ def handle_new_mention(mention):
         elif cmd.lower().startswith('rainbow'):
             sys.stdout.write('running rainbow\n')
             handle_rainbow()
+            
         
         elif cmd.lower().startswith('binary '):
             arg = cmd[len('binary '):]
             sys.stdout.write('binary(%s)\n' % arg)
             handle_binary(arg)
+        else:
+            return 0
+    else:
+        return 0
+    return 1
         
 
 
