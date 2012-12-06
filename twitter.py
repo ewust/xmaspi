@@ -154,7 +154,7 @@ def func(lock):
             print '%s Twitter blocked me, sleeping for a while' % cur_time 
 
             lock.release()
-            time.sleep(60)
+            time.sleep(300)
             continue
 
         print 'handling %d mentions...' % len(mentions)
