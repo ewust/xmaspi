@@ -10,6 +10,9 @@ cd ~pi/xmaspi
 ./driver.py
 
 
+# red status
+./driver.py 99 200 0 0 13
+
 # start wireless
 ./start-wireless.sh
 
@@ -18,8 +21,6 @@ cd ~pi/xmaspi
 for i in `seq 1 10`
 do
     ./driver.py 99 0 0 13 0
-    sleep .1
     ./driver.py 99 200 0 13 0
-    sleep .1
 done
 
