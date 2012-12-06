@@ -117,22 +117,25 @@ def func():
 
     while True:
         round_max_id = 0
+        num_mentions_run = 0
         mentions = api.mentions()
-        if len(mentions) == 0:
-            # No new tweets :(
-            # just run rainbow i guess
-            print 'no tweets, running rainbow'
-            handle_rainbow()
-            return
 
         for mention in mentions:
             if mention.id > max_id:
-                handle_new_mention(mention)
+                num_mentions_run += handle_new_mention(mention)
                 if mention.id > round_max_id:
                     round_max_id = mention.id
      
         put_last_max_id(round_max_id) # in case we die, store our state
         max_id = round_max_id
+
+        if num_mentions_run == 0:
+            # No new tweets :(
+            # just run rainbow i guess
+            print 'no tweets, running rainbow'
+            handle_rainbow()
+            return
+        
         return
 
 
