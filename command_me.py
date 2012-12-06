@@ -6,10 +6,15 @@ import socket
 import threading
 import SocketServer
 
+from multiprocessing import Process, Lock
+
 import driver
+
+global glock
 
 class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
 	def handle(self):
+		global glock
 		#d = driver.Driver()
 
 		self.request.settimeout(1)
@@ -61,28 +66,42 @@ Looking forward to your creations! :)
 			return
 
 		# Block for controller here
-		self.request.sendall("Go Time!\\0")
+		glock.acquire()
+		try:
+			self.request.sendall("Go Time!\\0")
 
-		start = time.time()
+			start = time.time()
 
-		while True:
-			if time.time() - start > 10:
-				print "User " + name + " timed out"
-				self.request.sendall("Time's up!\\0")
-				return
-			resp = self.request.recv(5, socket.MSG_WAITALL)
-			#print "got (len %d) >>>%s<<<" % (len(resp), resp)
-			if len(resp) == 0:
-				return
-			id, bri, grn, red, blu = struct.unpack("BBBBB", resp)
-			#d.write_led(id, bri, grn, red, blu)
-			print "Would set bulb %d to brightness %d with GRB %d %d %d" % (id, bri, grn, red, blu)
+			while True:
+				if time.time() - start > 10:
+					print "User " + name + " timed out"
+					self.request.sendall("Time's up!\\0")
+					glock.release()
+					return
+				resp = self.request.recv(5, socket.MSG_WAITALL)
+				#print "got (len %d) >>>%s<<<" % (len(resp), resp)
+				if len(resp) == 0:
+					glock.release()
+					return
+				id, bri, grn, red, blu = struct.unpack("BBBBB", resp)
+				#d.write_led(id, bri, grn, red, blu)
+				print "Would set bulb %d to brightness %d with GRB %d %d %d" % (id, bri, grn, red, blu)
+		except:
+			glock.release()
+			return
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
 	pass
 
-if __name__ == '__main__':
+def command_me(lock):
 	HOST, PORT = "0.0.0.0", 4908
+
+	global glock
+	glock = lock
 
 	server = ThreadedTCPServer((HOST, PORT), ThreadedTCPRequestHandler)
 	server.serve_forever()
+
+if __name__ == '__main__':
+	lock = Lock()
+	Process(target=command_me, args=(lock,)).start()
