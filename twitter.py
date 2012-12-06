@@ -126,18 +126,23 @@ def func(lock):
 
     while True:
         lock.acquire()
-        round_max_id = 0
+        round_max_id = max_id
         num_mentions_run = 0
         mentions = api.mentions()
 
         for mention in mentions:
             if mention.id > max_id:
                 print 'tweet %d > %d' % (mention.id, max_id)
-                num_mentions_run += handle_new_mention(mention)
+                num_mentions_run + handle_new_mention(mention)
                 if mention.id > round_max_id:
                     round_max_id = mention.id
+                if num_mentions_run > 0:
+                    # given someone else a shot at running
+                    lock.release()
+                    lock.acquire()
             
      
+        print 'new round max %d' % round_max_id
         put_last_max_id(round_max_id) # in case we die, store our state
         max_id = round_max_id
 
