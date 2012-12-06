@@ -39,19 +39,23 @@ except:
 bs.update_text(out_str)
 bs.bit_offset = -3
 
+bs.update_pattern()
+
 # set beginning to green
 strand = rgb_strand.RGBStrand(100)
-strand.set_bulb_color(0, 70, 0, 13, 0)
-strand.set_bulb_color(1, 150, 0, 13, 0)
-strand.set_bulb_color(2, 0, 0, 0, 0)
+strand.set_bulb_color(0, 0, 13, 0)
+strand.set_bulb_brightness(0, 70)
+
+strand.set_bulb_color(1, 0, 13, 0)
+strand.set_bulb_brightness(1, 150)
+
+strand.set_bulb_color(2, 0, 0, 0)
+strand.set_bulb_brightness(2, 0)
 
 
 # set separator byte to all off
 for i in range(39, 39+8):
-    strand.set_bulb_color(i, 0, 0, 0, 0)
-
-
-
+    strand.set_bulb_brightness(i, 0)
 
 
 
