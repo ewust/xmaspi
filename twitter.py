@@ -100,7 +100,7 @@ def handle_color(color):
         pass
 
 
-def handle_new_mention(lock, mention):
+def handle_new_mention(lock, api, mention):
     lock.acquire()
     try:
         tweet = str(mention.text).strip()
@@ -110,24 +110,31 @@ def handle_new_mention(lock, mention):
 
             if cmd.lower().startswith('ip'):
                 sys.stdout.write('ip\n')
+                api.update_status('Blinken my IP address for @%s' % (mention.user.screen_name), mention.id)
                 handle_ip()
 
             elif cmd.lower().startswith('all '):
                 color = cmd[len('all '):].lower()
                 sys.stdout.write('color(%s)\n' % color)
+                api.update_status('Setting the strand to %s for @%s' % (color, mention.user.screen_name), mention.id)
                 handle_color(color)
 
             elif cmd.lower().startswith('rainbow'):
                 sys.stdout.write('running rainbow\n')
+                api.update_status('@%s can taste the rainbow!' % (mention.user.screen_name), mention.id)
                 handle_rainbow()
 
             elif cmd.lower().startswith('binary '):
                 arg = cmd[len('binary '):]
                 sys.stdout.write('binary(%s)\n' % arg)
+                # This is 'Enjoy!' in binary ASCII
+                enjoy_ascii = '01000101 01101110 01101010 01101111 01111001 00100001'
+                api.update_status('%s @%s' % (enjoy_ascii, mention.user.screen_name), mention.id)
                 handle_binary(arg)
             else:
                 sys.stdout.write('\n')
                 sys.stdout.write('[unknown cmd, did nothing]')
+                api.update_status("I don't know that one @%s. Maybe you should hack it for me ;)" % (mention.user.screen_name), mention.id)
         else:
             sys.stdout.write('\n')
             sys.stdout.write('[tweet did not start with @bbb_blinken, did nothing]')
@@ -166,7 +173,7 @@ def func(lock):
         for mention in mentions:
             if mention.id > max_id:
                 print 'tweet %d > %d' % (mention.id, max_id)
-                handle_new_mention(lock, mention)
+                handle_new_mention(lock, api, mention)
                 if mention.id > round_max_id:
                     round_max_id = mention.id
                 if num_mentions_run > 0:
