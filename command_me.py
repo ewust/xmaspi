@@ -20,8 +20,6 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
 		if len(sys.argv) == 1:
 			d = driver.Driver()
 
-		self.request.settimeout(1)
-
 		name = self.request.recv(1)
 		while True:
 			if name[-1] == '\0':
@@ -45,7 +43,8 @@ back to me. I'll enqueue you to control the strand. When it's your
 turn, I'll send you the 9 bytes
   >>>Go Time!\\0<<<
 This will start a 30 second timer. During your 30 seconds, I'll forward
-every command you send directly to the strand.
+every command you send directly to the strand. You'll need to send at least
+one packet every second to keep your session alive.
 
 Controlling the bulbs is a 5-byte tuple:
  bulb_id [0-99]
@@ -67,6 +66,8 @@ Looking forward to your creations! :)
 			print "Didn't get let's go, got:"
 			print ">>>%s<<<" % (resp)
 			return
+
+		self.request.settimeout(1)
 
 		# Block for controller here
 		glock.acquire()
