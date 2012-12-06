@@ -7,6 +7,7 @@ import time
 import sys
 import rgb_strand
 import webcolors
+import traceback
 import socket
 import fcntl
 SIOCGIFADDR = 0x8915
@@ -99,40 +100,44 @@ def handle_color(color):
         pass
 
 
-
 def handle_new_mention(lock, mention):
+    lock.acquire()
+    try:
+        tweet = str(mention.text).strip()
+        sys.stdout.write('%s: \'%s\': ' % (mention.user.screen_name, tweet))
+        if tweet.lower().startswith('@bbb_blinken '):
+            cmd = tweet[len('@bbb_blinken '):]
 
-    tweet = str(mention.text).strip()
-    sys.stdout.write('%s: \'%s\': ' % (mention.user.screen_name, tweet))
-    if tweet.lower().startswith('@bbb_blinken '):
-        cmd = tweet[len('@bbb_blinken '):]
+            if cmd.lower().startswith('ip'):
+                sys.stdout.write('ip\n')
+                handle_ip()
 
-        if cmd.lower().startswith('ip'):
-            sys.stdout.write('ip\n')
-            handle_ip()
+            elif cmd.lower().startswith('all '):
+                color = cmd[len('all '):].lower()
+                sys.stdout.write('color(%s)\n' % color)
+                handle_color(color)
 
-        elif cmd.lower().startswith('all '):
-            color = cmd[len('all '):].lower()
-            sys.stdout.write('color(%s)\n' % color)
-            handle_color(color)
+            elif cmd.lower().startswith('rainbow'):
+                sys.stdout.write('running rainbow\n')
+                handle_rainbow()
 
-        elif cmd.lower().startswith('rainbow'):
-            sys.stdout.write('running rainbow\n')
-            handle_rainbow(lock)
-            
-        
-        elif cmd.lower().startswith('binary '):
-            arg = cmd[len('binary '):]
-            sys.stdout.write('binary(%s)\n' % arg)
-            handle_binary(arg)
+            elif cmd.lower().startswith('binary '):
+                arg = cmd[len('binary '):]
+                sys.stdout.write('binary(%s)\n' % arg)
+                handle_binary(arg)
+            else:
+                sys.stdout.write('\n')
+                sys.stdout.write('[unknown cmd, did nothing]')
         else:
             sys.stdout.write('\n')
-            return 0
-    else:
-        sys.stdout.write('\n')
-        return 0
-    return 1
-        
+            sys.stdout.write('[tweet did not start with @bbb_blinken, did nothing]')
+    except:
+        print "Uncaught exception"
+        print '-'*60
+        traceback.print_exc(file=sys.stdout)
+        print '-'*60
+    finally:
+        lock.release()
 
 
 def func(lock):
@@ -145,7 +150,6 @@ def func(lock):
     max_id = get_last_max_id()
 
     while True:
-        lock.acquire()
         round_max_id = max_id
         num_mentions_run = 0
         try:
@@ -154,7 +158,6 @@ def func(lock):
             cur_time = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
             print '%s Twitter blocked me, sleeping for a while' % cur_time 
 
-            lock.release()
             time.sleep(300)
             continue
 
@@ -162,15 +165,12 @@ def func(lock):
         for mention in mentions:
             if mention.id > max_id:
                 print 'tweet %d > %d' % (mention.id, max_id)
-                num_mentions_run + handle_new_mention(lock, mention)
+                handle_new_mention(lock, mention)
                 if mention.id > round_max_id:
                     round_max_id = mention.id
                 if num_mentions_run > 0:
-                    # given someone else a shot at running
-                    lock.release()
+                    # give someone else a shot at running
                     time.sleep(1)
-                    lock.acquire()
-            
      
         print 'new round max %d' % round_max_id
         put_last_max_id(round_max_id) # in case we die, store our state
@@ -180,11 +180,8 @@ def func(lock):
             # No new tweets :(
             # just run rainbow i guess
             print 'no tweets'
-            lock.release()
             time.sleep(20)
             continue
-        
-        lock.release()
 
     #d = driver.Driver()
     #bs = binary.BinaryShifter('Tweet me!')
