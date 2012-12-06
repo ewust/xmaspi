@@ -167,6 +167,7 @@ def func(lock):
                 if num_mentions_run > 0:
                     # given someone else a shot at running
                     lock.release()
+                    time.sleep(1)
                     lock.acquire()
             
      
@@ -179,7 +180,7 @@ def func(lock):
             # just run rainbow i guess
             print 'no tweets'
             lock.release()
-            time.sleep(3)
+            time.sleep(20)
             continue
         
         lock.release()
