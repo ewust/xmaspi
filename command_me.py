@@ -89,7 +89,7 @@ Looking forward to your creations! :)
 					#print "bulb %d brightness %d GBR %d %d %d" % (id, bri, grn, blu, red)
 					self.request.sendall("Invalid parameter, skipped\\0")
 					continue
-				d.write_led(id, bri, grn, blu, red)
+				d.write_led(id, bri, blu, grn, red)
 				#print "Would set bulb %d to brightness %d with GBR %d %d %d" % (id, bri, grn, blu, red)
 		except:
 			glock.release()

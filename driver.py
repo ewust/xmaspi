@@ -74,7 +74,7 @@ class Driver(object):
     def get_physical_addr(self, led_id):
         return self.phys_addr[led_id]
 
-    def write_led_buffered(self, led_id, brightness, green, blue, red):
+    def write_led_buffered(self, led_id, brightness, blue, green, red):
         
         if led_id == -1:
             # Broadcast
@@ -82,10 +82,10 @@ class Driver(object):
                 self.buffer_pkt((s, 63), brightness, 0, 0, 0)
         else:
             # Unicast
-            self.buffer_pkt(self.get_physical_addr(led_id), brightness, green, blue, red)
+            self.buffer_pkt(self.get_physical_addr(led_id), brightness, blue, green, red)
 
 
-    def write_led(self, led_id, brightness, green, blue, red):
+    def write_led(self, led_id, brightness, blue, green, red):
 
         if led_id == -1:
             # Broadcast
@@ -93,7 +93,7 @@ class Driver(object):
                 self.send_pkt((s, 63), brightness, 0, 0, 0)
         else:
             # Unicast
-            self.send_pkt(self.get_physical_addr(led_id), brightness, green, blue, red)
+            self.send_pkt(self.get_physical_addr(led_id), brightness, blue, green, red)
 
 if __name__=="__main__":
     # Test
