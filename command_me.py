@@ -23,11 +23,8 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
 		try:
 			name = self.request.recv(1)
 			while True:
-				if name[-1] == '\0':
+				if name[-1] in ('\0', '\n'):
 					break
-				elif name[-1] == '\n':
-					self.request.sendall("I don't like newlines.\r\n")
-					return
 				elif len(name) == 16:
 					return
 				resp = self.request.recv(1)
@@ -70,6 +67,8 @@ Looking forward to your creations! :)
 
 		resp = self.request.recv(9)
 		if resp != "let's go\0":
+			self.request.sendall("I didn't get let's go, I got:\n")
+			self.request.sendall(resp)
 			print "Didn't get let's go, got:"
 			print ">>>%s<<<" % (resp)
 			return
