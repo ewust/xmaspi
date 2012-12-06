@@ -43,10 +43,10 @@ bs.update_pattern()
 
 # set beginning to green
 strand = rgb_strand.RGBStrand(100)
-strand.set_bulb_color(0, 0, 13, 0)
+strand.set_bulb_color(0, 0, 0, 13)
 strand.set_bulb_brightness(0, 70)
 
-strand.set_bulb_color(1, 0, 13, 0)
+strand.set_bulb_color(1, 0, 0, 13)
 strand.set_bulb_brightness(1, 150)
 
 strand.set_bulb_color(2, 0, 0, 0)
