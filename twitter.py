@@ -42,9 +42,9 @@ def put_last_max_id(mid):
 
 
 def get_interface_ip(ifname):
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        saddr = fcntl.ioctl(s.fileno(), SIOCGIFADDR, struct.pack('256s', ifname[:15]))
-        return saddr[20:24]
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    saddr = fcntl.ioctl(s.fileno(), SIOCGIFADDR, struct.pack('256s', ifname[:15]))
+    return saddr[20:24]
 
 def handle_ip():
 
@@ -58,7 +58,7 @@ def handle_ip():
         time.sleep(.5)
 
 
-def handle_rainbow():
+def handle_rainbow(lock):
     colors = [(15, 0, 0), \
             (15, 3, 0), \
             (15, 15, 0), \
@@ -75,6 +75,10 @@ def handle_rainbow():
     for i in range(200):
         idx = i % len(colors)
         strand.push_top(200, colors[idx][0], colors[idx][1], colors[idx][2])
+
+        # Let other people use it if they want it
+        lock.release()
+        lock.acquire()
 
 
 def handle_binary(text):
@@ -100,7 +104,7 @@ def handle_color(color):
 
 
 
-def handle_new_mention(mention):
+def handle_new_mention(lock, mention):
 
     tweet = str(mention.text).strip()
     sys.stdout.write('%s: \'%s\': ' % (mention.user.screen_name, tweet))
@@ -118,7 +122,7 @@ def handle_new_mention(mention):
 
         elif cmd.lower().startswith('rainbow'):
             sys.stdout.write('running rainbow\n')
-            handle_rainbow()
+            handle_rainbow(lock)
             
         
         elif cmd.lower().startswith('binary '):
@@ -154,7 +158,7 @@ def func(lock):
         for mention in mentions:
             if mention.id > max_id:
                 print 'tweet %d > %d' % (mention.id, max_id)
-                num_mentions_run + handle_new_mention(mention)
+                num_mentions_run + handle_new_mention(lock, mention)
                 if mention.id > round_max_id:
                     round_max_id = mention.id
                 if num_mentions_run > 0:
