@@ -10,15 +10,16 @@ cd ~pi/xmaspi
 ./driver.py
 
 
+# start wireless
+./start-wireless.sh
 
-./driver.py 99 200 0 13 0
-sleep 1
-./driver.py 99 0 0 13 0
-sleep .5
-./driver.py 99 200 0 13 0
-sleep 1
-./driver.py 99 0 0 13 0
-sleep .5
-./driver.py 99 200 0 13 0
 
+# blink last LED to show we are done
+for i in `seq 1 10`
+do
+    ./driver.py 99 0 0 13 0
+    sleep .1
+    ./driver.py 99 200 0 13 0
+    sleep .1
+done
 
