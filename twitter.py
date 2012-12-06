@@ -186,7 +186,7 @@ def func(lock):
  
         while bs.shift():       
             bs.update_pattern()
-            time.sleep(1)
+            time.sleep(20)
     sys.exit(0)
 
 if __name__=="__main__":
