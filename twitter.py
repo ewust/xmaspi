@@ -136,6 +136,7 @@ def func(lock):
                 num_mentions_run += handle_new_mention(mention)
                 if mention.id > round_max_id:
                     round_max_id = mention.id
+            
      
         put_last_max_id(round_max_id) # in case we die, store our state
         max_id = round_max_id
@@ -145,10 +146,10 @@ def func(lock):
             # just run rainbow i guess
             print 'no tweets, running rainbow'
             handle_rainbow()
-            return
+            lock.release()
+            continue
         
-        return
-
+        lock.release()
 
     #d = driver.Driver()
     #bs = binary.BinaryShifter('Tweet me!')
@@ -164,4 +165,5 @@ def func(lock):
     sys.exit(0)
 
 if __name__=="__main__":
-    func()
+    from multiprocessing import Process, Lock
+    func(Lock())
