@@ -4,6 +4,7 @@
 cd ~pi/xmaspi/lkm
 insmod xmas.ko
 mknod /dev/xmas c 252 0
+chmod 222 /dev/xmas
 
 # run the init script
 cd ~pi/xmaspi
