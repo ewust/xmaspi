@@ -8,7 +8,7 @@ import sys
 import rgb_strand
 import webcolors
 import socket
-import fnctl
+import fcntl
 SIOCGIFADDR = 0x8915
 import struct
 from api_keys import *
