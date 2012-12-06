@@ -4,16 +4,10 @@ import tweepy
 import driver
 import binary
 import time
+import sys
+from api_keys import *
 
-# Go to http://dev.twitter.com and create an app.
-# The consumer key and secret will be generated for you after
-consumer_key="eOKlOriKjTtq0WwNMEaNNA"
-consumer_secret="YpxnpCH2yiW8DqgxY6VSw7zxeKcv2G9dGxGAQWQ5DTA"
-
-# After the step above, you will be redirected to your app's page.
-# Create an access token under the the "Your access token" section
-access_token="94415153-PTcAssFg3EdKaoQCunnS81BS7K1cYIFkLSuW2q8mp"
-access_token_secret="0PS2DAFN1ajpPvy5g0Zh5DP6M5gJZ8MCFNqoJr2Z9c"
+NUM_BULBS = 100
 
 class StdOutListener(tweepy.StreamListener):
     """ A listener handles tweets are the received from the stream.
@@ -27,14 +21,95 @@ class StdOutListener(tweepy.StreamListener):
     def on_error(self, status):
         print status
 
+
+MAX_MENTION_FILE='max_mention_id'
+def get_last_max_id():
+    f = open(MAX_MENTION_FILE, 'r')
+    mid = int(f.readline().strip())
+    f.close()
+    return mid
+
+def put_last_max_id(mid):
+    f = open(MAX_MENTION_FILE, 'w')
+    f.write(str(mid))
+    f.close()
+
+def handle_ip():
+
+    d = driver.Driver()
+    bs = binary.BinaryShifter()
+
+
+def handle_rainbow():
+    
+
+def handle_binary(text):
+    
+    d = driver.Driver()
+    bs = binary.BinaryShifter(text)
+
+def handle_color(color):
+    
+    strand = rgb_strand.RGBStrand(NUM_BULBS)
+    try:
+        rgb = webcolors.name_to_rgb(color)
+        strand.set_strand_color(rgb[0]/16, rgb[1]/16, rgb[2]/16)
+        # respond to user?
+    except:
+        # Shame user?
+        pass
+
+
+
+def handle_new_mention(mention):
+
+    tweet = mention.text.strip() 
+    if tweet.lower().startswith('@bbb_blinken '):
+        cmd = tweet[len('@bbb_blinken '):]
+
+        if cmd.lower().startswith('ip'):
+            handle_ip()
+
+        elif cmd.lower().startswith('all '):
+            color = cmd[len('all '):].lower()
+            handle_all_cmd(color)
+
+        elif cmd.lower().startwith('rainbow'):
+            handle_rainbow()
+        
+        elif cmd.lower().startswith('binary '):
+            arg = cmd[len('binary '):]
+            handle_binary(arg)
+        
+
 if __name__ == '__main__':
+
     l = StdOutListener()
     a = tweepy.OAuthHandler(consumer_key, consumer_secret)
     a.set_access_token(access_token, access_token_secret)
     api = tweepy.API(a)
 
-    d = driver.Driver()
-    bs = binary.BinaryShifter('Tweet me!')
+
+    max_id = get_last_max_id()
+
+    while True:
+        round_max_id = 0
+        for mention in api.mentions():
+            if mention.id > max_id:
+                handle_new_mention(mention)
+                if mention.id > round_max_id:
+                    round_max_id = mention.id
+     
+        put_last_max_id(round_max_id) # in case we die, store our state
+        max_id = round_max_id
+
+
+
+
+    sys.exit(0)
+
+    #d = driver.Driver()
+    #bs = binary.BinaryShifter('Tweet me!')
 
     while True:
         results = api.search(q='#cseblinkenlights', rpp=1, result_type='recent')
