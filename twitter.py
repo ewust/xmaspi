@@ -5,6 +5,8 @@ import driver
 import binary
 import time
 import sys
+import rgb_strand
+import webcolors
 from api_keys import *
 
 NUM_BULBS = 100
@@ -54,11 +56,9 @@ def handle_rainbow():
     strand.set_strand_pattern(colors)
     strand.set_strand_brightness(200)
 
-    i = 0
     for i in range(200):
-        strand.push_top(200, colors[i][0], colors[i][1], colors[i][2])
-        i += 1
-        i %= len(colors)
+        idx = i % len(colors)
+        strand.push_top(200, colors[idx][0], colors[idx][1], colors[idx][2])
 
 
 def handle_binary(text):
@@ -81,7 +81,7 @@ def handle_color(color):
 
 def handle_new_mention(mention):
 
-    tweet = mention.text.strip() 
+    tweet = str(mention.text).strip()
     if tweet.lower().startswith('@bbb_blinken '):
         cmd = tweet[len('@bbb_blinken '):]
 
@@ -90,9 +90,9 @@ def handle_new_mention(mention):
 
         elif cmd.lower().startswith('all '):
             color = cmd[len('all '):].lower()
-            handle_all_cmd(color)
+            handle_color(color)
 
-        elif cmd.lower().startwith('rainbow'):
+        elif cmd.lower().startswith('rainbow'):
             handle_rainbow()
         
         elif cmd.lower().startswith('binary '):
