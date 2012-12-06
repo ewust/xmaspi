@@ -37,7 +37,7 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
 
 		print "Request from", name
 		# parse
-		self.request.sendall("Hi " + name + "!\n")
+		self.request.sendall("Hi " + name + "\n")
 		self.request.sendall("""
 You've found the Bob and Betty Beyster Bright Blinken Bulbs API!
 
@@ -78,7 +78,7 @@ Looking forward to your creations! :)
 		# Block for controller here
 		glock.acquire()
 		try:
-			self.request.sendall("Go Time!\\n")
+			self.request.sendall("Go Time!\n")
 
 			start = time.time()
 
@@ -105,13 +105,18 @@ Looking forward to your creations! :)
 					d.write_led(id, bri, blu, grn, red)
 				else:
 					print "Would set bulb %d to brightness %d with RGB %d %d %d" % (id, bri, red, grn, blu)
+		except socket.timeout:
+			print "User " + name + " timed out on sending me a packet"
+			self.request.sendall("You took too long to send me a packet. Goodbye!\n")
+			return
 		except:
-			glock.release()
 			print "User " + name + " threw an exception"
 			print '-'*60
 			traceback.print_exc(file=sys.stdout)
 			print '-'*60
 			return
+		finally:
+			glock.release()
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
 	pass
