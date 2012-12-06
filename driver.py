@@ -17,12 +17,12 @@ class Driver(object):
     # A strand with a -1 orientation will address 
     def __init__(self, strand_orientations=[-1, 1], \
                  strand_order=[0, 1], do_init=False):
+        self.f = open('/dev/xmas', 'w')
         self.num_strands = 1
         if strand_orientations != None:
             self.num_strands = len(strand_orientations)
         self.initialize(strand_orientations, strand_order, do_init)
     
-        self.f = open('/dev/xmas', 'w')
         pass
 
     # Initialize physical address on the strand
