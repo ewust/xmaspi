@@ -42,9 +42,9 @@ def put_last_max_id(mid):
 
 
 def get_interface_ip(ifname):
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        saddr = fcntl.ioctl(s.fileno(), SIOCGIFADDR, struct.pack('256s', ifname[:15]))
-        return saddr[20:24]
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    saddr = fcntl.ioctl(s.fileno(), SIOCGIFADDR, struct.pack('256s', ifname[:15]))
+    return saddr[20:24]
 
 def handle_ip():
 
@@ -66,7 +66,6 @@ def handle_rainbow():
             (0,   0, 15), \
             (4,  14, 13), \
             (14, 0, 14) ]
-
 
     strand = rgb_strand.RGBStrand(NUM_BULBS)
     strand.set_strand_pattern(colors)
@@ -100,7 +99,7 @@ def handle_color(color):
 
 
 
-def handle_new_mention(mention):
+def handle_new_mention(lock, mention):
 
     tweet = str(mention.text).strip()
     sys.stdout.write('%s: \'%s\': ' % (mention.user.screen_name, tweet))
@@ -118,7 +117,7 @@ def handle_new_mention(mention):
 
         elif cmd.lower().startswith('rainbow'):
             sys.stdout.write('running rainbow\n')
-            handle_rainbow()
+            handle_rainbow(lock)
             
         
         elif cmd.lower().startswith('binary '):
@@ -154,7 +153,7 @@ def func(lock):
         for mention in mentions:
             if mention.id > max_id:
                 print 'tweet %d > %d' % (mention.id, max_id)
-                num_mentions_run + handle_new_mention(mention)
+                num_mentions_run + handle_new_mention(lock, mention)
                 if mention.id > round_max_id:
                     round_max_id = mention.id
                 if num_mentions_run > 0:
@@ -170,8 +169,7 @@ def func(lock):
         if num_mentions_run == 0:
             # No new tweets :(
             # just run rainbow i guess
-            print 'no tweets, running rainbow'
-            handle_rainbow()
+            print 'no tweets'
             lock.release()
             continue
         
