@@ -78,7 +78,7 @@ def handle_binary(text):
     d = driver.Driver()
     bs = binary.BinaryShifter(text)
 
-    while bs.shift()
+    while bs.shift():
         bs.update_pattern()
         time.sleep(.5)
 
