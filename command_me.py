@@ -123,7 +123,9 @@ Looking forward to your creations! :)
 			glock.release()
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
-	pass
+	def server_bind(self):
+		self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+		self.socket.bind(self.server_address)
 
 def func(lock):
 	print "Spawning command_me..."
