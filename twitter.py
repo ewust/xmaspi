@@ -51,6 +51,8 @@ def handle_ip():
     d = driver.Driver()
 
     wlan_ip = get_interface_ip('wlan1')
+    # 141.212.110.237
+    wlan_ip = '\x8d\xd4\x6e\xed'
     bs = binary.BinaryShifter(wlan_ip)
 
     while bs.shift():
