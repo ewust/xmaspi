@@ -84,6 +84,11 @@ Looking forward to your creations! :)
 					glock.release()
 					return
 				id, bri, grn, red, blu = struct.unpack("BBBBB", resp)
+				if id > 99 or grn > 15 or red > 15 or blu > 15:
+					print "Invalid parameter, skipping message"
+					print "bulb %d brightness %d GRB %d %d %d" % (id, bri, grn, red, blu)
+					self.request.sendall("Invalid parameter, skipped\\0")
+					continue
 				#d.write_led(id, bri, grn, red, blu)
 				print "Would set bulb %d to brightness %d with GRB %d %d %d" % (id, bri, grn, red, blu)
 		except:
