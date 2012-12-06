@@ -164,6 +164,9 @@ def func(lock):
             mentions = api.mentions()
         except:
             cur_time = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
+            print '-'*60
+            traceback.print_exc(file=sys.stdout)
+            print '-'*60
             print '%s Twitter blocked me, sleeping for a while' % cur_time 
 
             time.sleep(300)
