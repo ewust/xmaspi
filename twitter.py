@@ -82,21 +82,26 @@ def handle_color(color):
 def handle_new_mention(mention):
 
     tweet = str(mention.text).strip()
+    sys.stdout.write('\'%s\': ', tweet)
     if tweet.lower().startswith('@bbb_blinken '):
         cmd = tweet[len('@bbb_blinken '):]
 
         if cmd.lower().startswith('ip'):
+            sys.stdout.write('ip\n')
             handle_ip()
 
         elif cmd.lower().startswith('all '):
             color = cmd[len('all '):].lower()
+            sys.stdout.write('color(%s)\n', color)
             handle_color(color)
 
         elif cmd.lower().startswith('rainbow'):
+            sys.stdout.write('running rainbow\n')
             handle_rainbow()
         
         elif cmd.lower().startswith('binary '):
             arg = cmd[len('binary '):]
+            sys.stdout.write('binary(%s)\n', arg)
             handle_binary(arg)
         
 
@@ -116,6 +121,7 @@ if __name__ == '__main__':
         if len(mentions) == 0:
             # No new tweets :(
             # just run rainbow i guess
+            print 'no tweets, running rainbow'
             handle_rainbow()
             continue
 
