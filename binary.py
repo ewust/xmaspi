@@ -20,6 +20,7 @@ class RGBStrands(object):
             driver.Driver().write_led_buffered(addr, x[0], x[1], x[2], x[3]) 
             addr += 1
 
+        print '%d' % len(driver.Driver().buf)
         driver.Driver().flush_buffer()
 
     
