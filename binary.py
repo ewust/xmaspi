@@ -34,6 +34,7 @@ class BinaryShifter(RGBStrands):
 
     def update_pattern(self):
         pos = 0
+        index = pos - self.bit_offset
         for c in self.text:
             for bit in range(8):
                 index = pos - self.bit_offset
