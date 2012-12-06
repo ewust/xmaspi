@@ -58,7 +58,7 @@ def handle_ip():
         time.sleep(.5)
 
 
-def handle_rainbow(lock):
+def handle_rainbow():
     colors = [(15, 0, 0), \
             (15, 3, 0), \
             (15, 15, 0), \
@@ -67,7 +67,6 @@ def handle_rainbow(lock):
             (4,  14, 13), \
             (14, 0, 14) ]
 
-
     strand = rgb_strand.RGBStrand(NUM_BULBS)
     strand.set_strand_pattern(colors)
     strand.set_strand_brightness(200)
@@ -75,10 +74,6 @@ def handle_rainbow(lock):
     for i in range(200):
         idx = i % len(colors)
         strand.push_top(200, colors[idx][0], colors[idx][1], colors[idx][2])
-
-        # Let other people use it if they want it
-        lock.release()
-        lock.acquire()
 
 
 def handle_binary(text):
@@ -174,8 +169,7 @@ def func(lock):
         if num_mentions_run == 0:
             # No new tweets :(
             # just run rainbow i guess
-            print 'no tweets, running rainbow'
-            handle_rainbow()
+            print 'no tweets'
             lock.release()
             continue
         
