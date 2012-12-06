@@ -18,9 +18,12 @@ cd ~pi/xmaspi
 
 
 # blink last LED to show we are done
-for i in `seq 1 10`
+for i in `seq 1 5`
 do
     ./driver.py 99 0 0 13 0
     ./driver.py 99 200 0 13 0
 done
+
+# show our ip address on the LEDs
+./ip.py
 
