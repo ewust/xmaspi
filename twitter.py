@@ -5,6 +5,8 @@ import driver
 import binary
 import time
 import sys
+import rgb_strand
+import webcolors
 from api_keys import *
 
 NUM_BULBS = 100
