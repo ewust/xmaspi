@@ -86,6 +86,8 @@ Looking forward to your creations! :)
         # Block for controller here
         glock.acquire()
         try:
+            logger.info('Running %s (%s:%d)' % \
+                (self.name, self.client_address[0], self.client_address[1]))
             self.request.sendall("Go Time!\n")
 
             start = time.time()
