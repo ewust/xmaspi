@@ -181,7 +181,6 @@ def func(lock):
             time.sleep(300)
             continue
 
-        print 'handling %d mentions...' % len(mentions)
         for mention in mentions:
             if mention.id > max_id:
                 print 'tweet %d > %d' % (mention.id, max_id)
@@ -192,14 +191,12 @@ def func(lock):
                     # give someone else a shot at running
                     time.sleep(1)
      
-        print 'new round max %d' % round_max_id
         put_last_max_id(round_max_id) # in case we die, store our state
         max_id = round_max_id
 
         if num_mentions_run == 0:
             # No new tweets :(
             # just run rainbow i guess
-            print 'no tweets'
             time.sleep(20)
             continue
 
