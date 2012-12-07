@@ -100,6 +100,15 @@ def handle_color(color):
         pass
 
 
+# Ignore duplicate tweet warnings, and do action anyway
+def tweet_response(api, mid, msg):
+    try:
+        api.update_status(msg, mid)
+    except:
+
+        pass
+
+
 def handle_new_mention(lock, api, mention):
     lock.acquire()
     try:
@@ -110,18 +119,18 @@ def handle_new_mention(lock, api, mention):
 
             if cmd.lower().startswith('ip'):
                 sys.stdout.write('ip\n')
-                api.update_status('Blinken my IP address for @%s' % (mention.user.screen_name), mention.id)
+                tweet_response(api, mention.id, 'Blinken my IP address for @%s' % (mention.user.screen_name))
                 handle_ip()
 
             elif cmd.lower().startswith('all '):
                 color = cmd[len('all '):].lower()
                 sys.stdout.write('color(%s)\n' % color)
-                api.update_status('Setting the strand to %s for @%s' % (color, mention.user.screen_name), mention.id)
+                tweet_response(api, mention.id, 'Setting the strand to %s for @%s' % (color, mention.user.screen_name))
                 handle_color(color)
 
             elif cmd.lower().startswith('rainbow'):
                 sys.stdout.write('running rainbow\n')
-                api.update_status('@%s can taste the rainbow!' % (mention.user.screen_name), mention.id)
+                tweet_response(api, mention.id, '@%s can taste the rainbow!' % (mention.user.screen_name))
                 handle_rainbow()
 
             elif cmd.lower().startswith('binary '):
@@ -129,12 +138,12 @@ def handle_new_mention(lock, api, mention):
                 sys.stdout.write('binary(%s)\n' % arg)
                 # This is 'Enjoy!' in binary ASCII
                 enjoy_ascii = '01000101 01101110 01101010 01101111 01111001 00100001'
-                api.update_status('%s @%s' % (enjoy_ascii, mention.user.screen_name), mention.id)
+                tweet_response(api, mention.id, '%s @%s' % (enjoy_ascii, mention.user.screen_name))
                 handle_binary(arg)
             else:
                 sys.stdout.write('\n')
                 sys.stdout.write('[unknown cmd, did nothing]')
-                api.update_status("I don't know that one @%s. Maybe you should hack it for me ;)   http://t.co/WMWzUQiR" % (mention.user.screen_name), mention.id)
+                tweet_response(api, mention.id, "I don't know that one @%s. Maybe you should hack it for me ;)   http://t.co/WMWzUQiR" % (mention.user.screen_name))
         else:
             sys.stdout.write('\n')
             sys.stdout.write('[tweet did not start with @bbb_blinken, did nothing]')
