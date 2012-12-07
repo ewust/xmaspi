@@ -15,6 +15,7 @@ import driver
 global glock
 
 class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
+
 	def handle(self):
 		global glock
 		if len(sys.argv) == 1:
@@ -33,7 +34,8 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
 				else:
 					return
 		finally:
-			print 'Got %d byte name >>>%s<<<' % (len(name), name)
+            self.name = name.strip()
+            logger.info("'%s' connected from %s:%d" % (self.name, self.client_address[0], self.client_address[1]))
 
 		name = name[:-1]
 		if len(name) == 0:
@@ -41,7 +43,6 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
 			self.request.sendall("Try sending a name next time. Goodbye.\n")
 			return
 
-		print "Request from", name
 		# parse
 		self.request.sendall("Hi " + name + "\n")
 		self.request.sendall("""
@@ -75,8 +76,8 @@ Looking forward to your creations! :)
 		if resp != "let's go\n":
 			self.request.sendall("I didn't get let's go\\n, I got:\n")
 			self.request.sendall(resp)
-			print "Didn't get let's go from %s, got:" % (name)
-			print ">>>%s<<<" % (resp)
+            logger.info("%s (%s:%d) didn't send 'let's go'" % \
+                (self.name, self.client_address[0], self.client_address[1]))
 			return
 
 		self.request.settimeout(1)
@@ -90,13 +91,15 @@ Looking forward to your creations! :)
 
 			while True:
 				if time.time() - start > 30:
-					print "User " + name + " timed out"
-					self.request.sendall("Time's up!\\0")
+                    logger.info("%s (%s:%d) timed out" % \
+                        (self.name, self.client_address[0], self.client_address[1]))
+					self.request.sendall("Time's up!\n")
 					return
 				resp = self.request.recv(5, socket.MSG_WAITALL)
 				#print "got (len %d) >>>%s<<<" % (len(resp), resp)
 				if len(resp) == 0:
-					print "User " + name + " closed connection"
+                    logger.info("%s (%s:%d) closed the connection" % \
+                        (self.name, self.client_address[0], self.client_address[1]))
 					return
 				id, bri, red, grn, blu = struct.unpack("BBBBB", resp)
 				if id > 99 or grn > 15 or blu > 15 or red > 15:
@@ -108,7 +111,7 @@ Looking forward to your creations! :)
 				if len(sys.argv) == 1:
 					d.write_led(id, bri, blu, grn, red)
 				else:
-					print "Would set bulb %d to brightness %d with RGB %d %d %d" % (id, bri, red, grn, blu)
+				    logger.debug("Would set bulb %d to brightness %d with RGB %d %d %d" % (id, bri, red, grn, blu))
 		except socket.timeout:
 			print "User " + name + " timed out on sending me a packet"
 			self.request.sendall("You took too long to send me a packet. Goodbye!\n")
@@ -128,7 +131,7 @@ class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
 		self.socket.bind(self.server_address)
 
 def func(lock):
-	print "Spawning command_me..."
+    logger.info("Spawning command_me...")
 
 	HOST, PORT = "0.0.0.0", 4908
 
