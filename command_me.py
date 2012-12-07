@@ -16,36 +16,36 @@ global glock
 
 class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
 
-	def handle(self):
-		global glock
-		if len(sys.argv) == 1:
-			d = driver.Driver()
+    def handle(self):
+        global glock
+        if len(sys.argv) == 1:
+            d = driver.Driver()
 
-		try:
-			name = self.request.recv(1)
-			while True:
-				if name[-1] in ('\0', '\n'):
-					break
-				elif len(name) == 16:
-					return
-				resp = self.request.recv(1)
-				if len(resp):
-					name += resp
-				else:
-					return
-		finally:
+        try:
+            name = self.request.recv(1)
+            while True:
+                if name[-1] in ('\0', '\n'):
+                    break
+                elif len(name) == 16:
+                    return
+                resp = self.request.recv(1)
+                if len(resp):
+                    name += resp
+                else:
+                    return
+        finally:
             self.name = name.strip()
             logger.info("'%s' connected from %s:%d" % (self.name, self.client_address[0], self.client_address[1]))
 
-		name = name[:-1]
-		if len(name) == 0:
-			self.request.sendall("I won't talk to you if you don't tell me who you are.\n")
-			self.request.sendall("Try sending a name next time. Goodbye.\n")
-			return
+        name = name[:-1]
+        if len(name) == 0:
+            self.request.sendall("I won't talk to you if you don't tell me who you are.\n")
+            self.request.sendall("Try sending a name next time. Goodbye.\n")
+            return
 
-		# parse
-		self.request.sendall("Hi " + name + "\n")
-		self.request.sendall("""
+        # parse
+        self.request.sendall("Hi " + name + "\n")
+        self.request.sendall("""
 You've found the Bob and Betty Beyster Bright Blinken Bulbs API!
 
 Once you're ready to control the strand, send the 9 bytes
@@ -72,75 +72,75 @@ Looking forward to your creations! :)
 \0
 """)
 
-		resp = self.request.recv(9)
-		if resp != "let's go\n":
-			self.request.sendall("I didn't get let's go\\n, I got:\n")
-			self.request.sendall(resp)
+        resp = self.request.recv(9)
+        if resp != "let's go\n":
+            self.request.sendall("I didn't get let's go\\n, I got:\n")
+            self.request.sendall(resp)
             logger.info("%s (%s:%d) didn't send 'let's go'" % \
                 (self.name, self.client_address[0], self.client_address[1]))
-			return
+            return
 
-		self.request.settimeout(1)
+        self.request.settimeout(1)
 
-		# Block for controller here
-		glock.acquire()
-		try:
-			self.request.sendall("Go Time!\n")
+        # Block for controller here
+        glock.acquire()
+        try:
+            self.request.sendall("Go Time!\n")
 
-			start = time.time()
+            start = time.time()
 
-			while True:
-				if time.time() - start > 30:
+            while True:
+                if time.time() - start > 30:
                     logger.info("%s (%s:%d) timed out" % \
                         (self.name, self.client_address[0], self.client_address[1]))
-					self.request.sendall("Time's up!\n")
-					return
-				resp = self.request.recv(5, socket.MSG_WAITALL)
-				#print "got (len %d) >>>%s<<<" % (len(resp), resp)
-				if len(resp) == 0:
+                    self.request.sendall("Time's up!\n")
+                    return
+                resp = self.request.recv(5, socket.MSG_WAITALL)
+                #print "got (len %d) >>>%s<<<" % (len(resp), resp)
+                if len(resp) == 0:
                     logger.info("%s (%s:%d) closed the connection" % \
                         (self.name, self.client_address[0], self.client_address[1]))
-					return
-				id, bri, red, grn, blu = struct.unpack("BBBBB", resp)
-				if id > 99 or grn > 15 or blu > 15 or red > 15:
-					if len(sys.argv) > 1:
-						print "Invalid parameter, skipping message"
-						print "bulb %d brightness %d RGB %d %d %d" % (id, bri, red, grn, blu)
-					self.request.sendall("Invalid parameter, skipped\\0")
-					continue
-				if len(sys.argv) == 1:
-					d.write_led(id, bri, blu, grn, red)
-				else:
-				    logger.debug("Would set bulb %d to brightness %d with RGB %d %d %d" % (id, bri, red, grn, blu))
-		except socket.timeout:
-			print "User " + name + " timed out on sending me a packet"
-			self.request.sendall("You took too long to send me a packet. Goodbye!\n")
-			return
-		except:
-			print "User " + name + " threw an exception"
-			print '-'*60
-			traceback.print_exc(file=sys.stdout)
-			print '-'*60
-			return
-		finally:
-			glock.release()
+                    return
+                id, bri, red, grn, blu = struct.unpack("BBBBB", resp)
+                if id > 99 or grn > 15 or blu > 15 or red > 15:
+                    if len(sys.argv) > 1:
+                        print "Invalid parameter, skipping message"
+                        print "bulb %d brightness %d RGB %d %d %d" % (id, bri, red, grn, blu)
+                    self.request.sendall("Invalid parameter, skipped\\0")
+                    continue
+                if len(sys.argv) == 1:
+                    d.write_led(id, bri, blu, grn, red)
+                else:
+                    logger.debug("Would set bulb %d to brightness %d with RGB %d %d %d" % (id, bri, red, grn, blu))
+        except socket.timeout:
+            print "User " + name + " timed out on sending me a packet"
+            self.request.sendall("You took too long to send me a packet. Goodbye!\n")
+            return
+        except:
+            print "User " + name + " threw an exception"
+            print '-'*60
+            traceback.print_exc(file=sys.stdout)
+            print '-'*60
+            return
+        finally:
+            glock.release()
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
-	def server_bind(self):
-		self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-		self.socket.bind(self.server_address)
+    def server_bind(self):
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.socket.bind(self.server_address)
 
 def func(lock):
     logger.info("Spawning command_me...")
 
-	HOST, PORT = "0.0.0.0", 4908
+    HOST, PORT = "0.0.0.0", 4908
 
-	global glock
-	glock = lock
+    global glock
+    glock = lock
 
-	server = ThreadedTCPServer((HOST, PORT), ThreadedTCPRequestHandler)
-	server.serve_forever()
+    server = ThreadedTCPServer((HOST, PORT), ThreadedTCPRequestHandler)
+    server.serve_forever()
 
 if __name__ == '__main__':
-	lock = Lock()
-	Process(target=func, args=(lock,)).start()
+    lock = Lock()
+    Process(target=func, args=(lock,)).start()
