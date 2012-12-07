@@ -114,11 +114,15 @@ Looking forward to your creations! :)
                 else:
                     logger.debug("Would set bulb %d to brightness %d with RGB %d %d %d" % (id, bri, red, grn, blu))
         except socket.timeout:
-            print "User " + name + " timed out on sending me a packet"
+            logger.info("%s (%s:%d) timed out on sending me a packet" % \
+                (self.name, self.client_address[0], self.client_address[1]))
+            
             self.request.sendall("You took too long to send me a packet. Goodbye!\n")
             return
         except:
-            print "User " + name + " threw an exception"
+            
+            logger.info("%s (%s:%d) threw an exception:" % \
+                (self.name, self.client_address[0], self.client_address[1]))
             print '-'*60
             traceback.print_exc(file=sys.stdout)
             print '-'*60
