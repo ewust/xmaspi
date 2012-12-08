@@ -26,7 +26,10 @@ do
 done
 
 # show our ip address on the LEDs
-./ip.py
+./ip.py &
+pid=$!
+sleep 5
+kill $pid
 
 
 ntpdate -ub 0.us.pool.ntp.org
