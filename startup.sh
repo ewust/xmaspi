@@ -15,7 +15,7 @@ cd ~pi/xmaspi
 ./driver.py 99 200 0 0 13
 
 # start wireless
-./start-wireless.sh
+./start-wireless.sh&
 
 
 # blink last LED to show we are done
@@ -27,4 +27,11 @@ done
 
 # show our ip address on the LEDs
 ./ip.py
+
+
+ntpdate -ub 0.us.pool.ntp.org
+
+su xmaslights
+cd /home/xmaslights/xmaspi/
+./xmas.py &
 

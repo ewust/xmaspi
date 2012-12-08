@@ -7,6 +7,7 @@ import time
 import sys
 import rgb_strand
 import webcolors
+import traceback
 import socket
 import fcntl
 SIOCGIFADDR = 0x8915
@@ -51,6 +52,7 @@ def handle_ip():
     d = driver.Driver()
 
     wlan_ip = get_interface_ip('wlan1')
+    wlan_ip = '\x8d\xd4\x6e\xed'
     bs = binary.BinaryShifter(wlan_ip)
 
     while bs.shift():
@@ -98,43 +100,64 @@ def handle_color(color):
         pass
 
 
+# Ignore duplicate tweet warnings, and do action anyway
+def tweet_response(api, mid, msg):
+    try:
+        api.update_status(msg, mid)
+    except:
 
-def handle_new_mention(lock, mention):
+        pass
 
-    tweet = str(mention.text).strip()
-    sys.stdout.write('%s: \'%s\': ' % (mention.user.screen_name, tweet))
-    if tweet.lower().startswith('@bbb_blinken '):
-        cmd = tweet[len('@bbb_blinken '):]
 
-        if cmd.lower().startswith('ip'):
-            sys.stdout.write('ip\n')
-            handle_ip()
+def handle_new_mention(lock, api, mention):
+    lock.acquire()
+    try:
+        tweet = str(mention.text).strip()
+        sys.stdout.write('%s: \'%s\': ' % (mention.user.screen_name, tweet))
+        if tweet.lower().startswith('@bbb_blinken '):
+            cmd = tweet[len('@bbb_blinken '):]
 
-        elif cmd.lower().startswith('all '):
-            color = cmd[len('all '):].lower()
-            sys.stdout.write('color(%s)\n' % color)
-            handle_color(color)
+            if cmd.lower().startswith('ip'):
+                sys.stdout.write('ip\n')
+                tweet_response(api, mention.id, 'Blinken my IP address for @%s' % (mention.user.screen_name))
+                handle_ip()
 
-        elif cmd.lower().startswith('rainbow'):
-            sys.stdout.write('running rainbow\n')
-            handle_rainbow(lock)
-            
-        
-        elif cmd.lower().startswith('binary '):
-            arg = cmd[len('binary '):]
-            sys.stdout.write('binary(%s)\n' % arg)
-            handle_binary(arg)
+            elif cmd.lower().startswith('all '):
+                color = cmd[len('all '):].lower()
+                sys.stdout.write('color(%s)\n' % color)
+                tweet_response(api, mention.id, 'Setting the strand to %s for @%s' % (color, mention.user.screen_name))
+                handle_color(color)
+
+            elif cmd.lower().startswith('rainbow'):
+                sys.stdout.write('running rainbow\n')
+                tweet_response(api, mention.id, '@%s can taste the rainbow!' % (mention.user.screen_name))
+                handle_rainbow()
+
+            elif cmd.lower().startswith('binary '):
+                arg = cmd[len('binary '):]
+                sys.stdout.write('binary(%s)\n' % arg)
+                # This is 'Enjoy!' in binary ASCII
+                enjoy_ascii = '01000101 01101110 01101010 01101111 01111001 00100001'
+                tweet_response(api, mention.id, '%s @%s' % (enjoy_ascii, mention.user.screen_name))
+                handle_binary(arg)
+            else:
+                sys.stdout.write('\n')
+                sys.stdout.write('[unknown cmd, did nothing]')
+                tweet_response(api, mention.id, "I don't know that one @%s. Maybe you should hack it for me ;)   http://t.co/WMWzUQiR" % (mention.user.screen_name))
         else:
             sys.stdout.write('\n')
-            return 0
-    else:
-        sys.stdout.write('\n')
-        return 0
-    return 1
-        
+            sys.stdout.write('[tweet did not start with @bbb_blinken, did nothing]')
+    except:
+        print "Uncaught exception"
+        print '-'*60
+        traceback.print_exc(file=sys.stdout)
+        print '-'*60
+    finally:
+        lock.release()
 
 
 def func(lock):
+    print "Spawning twitter..."
 
     #l = StdOutListener()
     a = tweepy.OAuthHandler(consumer_key, consumer_secret)
@@ -144,45 +167,38 @@ def func(lock):
     max_id = get_last_max_id()
 
     while True:
-        lock.acquire()
         round_max_id = max_id
         num_mentions_run = 0
         try:
             mentions = api.mentions()
         except:
             cur_time = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
+            print '-'*60
+            traceback.print_exc(file=sys.stdout)
+            print '-'*60
             print '%s Twitter blocked me, sleeping for a while' % cur_time 
 
-            lock.release()
             time.sleep(300)
             continue
 
-        print 'handling %d mentions...' % len(mentions)
         for mention in mentions:
             if mention.id > max_id:
                 print 'tweet %d > %d' % (mention.id, max_id)
-                num_mentions_run + handle_new_mention(lock, mention)
+                handle_new_mention(lock, api, mention)
                 if mention.id > round_max_id:
                     round_max_id = mention.id
                 if num_mentions_run > 0:
-                    # given someone else a shot at running
-                    lock.release()
-                    lock.acquire()
-            
+                    # give someone else a shot at running
+                    time.sleep(1)
      
-        print 'new round max %d' % round_max_id
         put_last_max_id(round_max_id) # in case we die, store our state
         max_id = round_max_id
 
         if num_mentions_run == 0:
             # No new tweets :(
             # just run rainbow i guess
-            print 'no tweets'
-            lock.release()
-            time.sleep(3)
+            time.sleep(20)
             continue
-        
-        lock.release()
 
     #d = driver.Driver()
     #bs = binary.BinaryShifter('Tweet me!')
