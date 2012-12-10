@@ -8,7 +8,7 @@ from remote import RemoteDriver
 import thread
 
 def start_proc(fname, lock, cur_running, priority, run_time, sleep_time):
-    logger.info('going to run %s' % f)
+    logger.info('going to run %s' % fname)
     RemoteDriver().set_lock(lock, cur_running, priority, run_time, sleep_time)
     g = globals()
     g['__name__'] = '__main__'
