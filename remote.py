@@ -7,6 +7,7 @@ import traceback
 import getpass
 import logger
 from priority_lock import acquire_lock_priority
+from driver import Driver
 
 # This is a Shim between a xmaspi-client RemoteDriver
 # that adapts it to the local RaspberryPi Driver
