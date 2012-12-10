@@ -14,14 +14,18 @@ def start_proc(f):
     execfile(f, g)
     logger.info('hmm execfile returned, weird.')
 
-def func(lock, cur_running, my_priority):
+
+
+def func(lock, fname, cur_running, my_priority, run_time, sleep_time):
     # let's run driver for 30 seconds:
-    RemoteDriver().set_lock(lock, cur_running, my_priority, 30, 1000)
+    RemoteDriver().set_lock(lock, cur_running, my_priority, run_time, sleep_time)
     
-    logger.info('Bored Sleeping for 5...')
-    time.sleep(5)
-    logger.info("Bored...running remote (don't crash on me!)")
-    thread.start_new_thread(start_proc, ('./xmaspi-client/sine.py',))
+    logger.info('Bored starting %s' % (fname))
+    thread.start_new_thread(start_proc, (fname,))
+
+
+    while True:
+        time.sleep(5)
 
     end = time.time() + 30
     while time.time() < end:
