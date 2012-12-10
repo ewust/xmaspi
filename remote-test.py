@@ -3,6 +3,7 @@ from remote import RemoteDriver
 import time
 
 print 'why no work'
+print "what name are we: %s" % __name__
 
 if __name__=="__main__":
     # Unit Test/Example Use:

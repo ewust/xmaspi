@@ -9,7 +9,9 @@ import thread
 
 def start_proc(f):
     logger.info('going to run %s' % f)
-    execfile(f, globals())
+    g = globals()
+    g['__name__'] = '__main__'
+    execfile(f, g)
     logger.info('hmm execfile returned, weird.')
 
 def func(lock, cur_running, my_priority):
