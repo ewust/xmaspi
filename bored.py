@@ -47,11 +47,13 @@ def func(lock, cur_running, my_priority):
             end = time.time() + run_time
             while time.time() < end:
                 time.sleep(0.1)
+            # Must take lock from them before we kill them
+            # so they don't die with the lock held
+            lock.acquire()
+
             p_bored.terminate()
-            # join?
 
             # clean up after last running process
-            lock.acquire()
             if cur_running.value == my_priority + idx:
                 cur_running.value = 0            
             lock.release()
