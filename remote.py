@@ -45,6 +45,7 @@ class RemoteDriver(object):
         # every once in a while, we should release the lock
         if self.lock == None:
             print 'oh no! did not transfer'
+        logger.info('remote wrote led ')
         if time.time() > self.next_acquire_time:
             #if self.have_lock:
             #    self.lock.release()
