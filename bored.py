@@ -47,4 +47,5 @@ def func(lock, cur_running, my_priority):
             time.sleep(3) 
 
         while True:
-            time.sleep(1000)
+            time.sleep(5)
+            logger.info('cur_running: %d' % (cur_running.value))
