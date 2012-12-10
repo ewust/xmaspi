@@ -37,13 +37,13 @@ def func(lock, cur_running, my_priority):
             idx += 1
             logger.info('Bored starting %s (prio %d)' % (fname, my_priority+idx))
     
-            p_bored = Process(target=start_proc, args=(fname, lock, cur_running,my_priority+idx, run_time, sleep_time))
+            p_bored = Process(target=start_proc, args=(fname, lock, cur_running,my_priority+idx, run_time - .5, sleep_time))
             
             p_bored.start()
             #thread.start_new_thread(start_proc, (fname,))
             
 
-            end = time.time() + run_time
+            end = time.time() + run_time + 0.5
             while time.time() < end:
                 time.sleep(0.1)
             p_bored.terminate()
