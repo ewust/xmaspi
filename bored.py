@@ -15,23 +15,30 @@ def start_proc(f):
     logger.info('hmm execfile returned, weird.')
 
 
+# (program, run time, sleep time, priority
+progs = [('./xmaspi-client/sine.py', 30, 90),\
+    ('./xmaspi-client/snake.py', 30, 90),\
+    ('./xmaspi-client/wheel.py', 30, 90),\
+    ('./xmaspi-client/sort.py', 30, 90), \
+    ('./xmaspi-client/mergesort.py', 30, 150), \
+    ('./xmaspi-client/quicksort.py', 50, 100)]
 
-def func(lock, fname, cur_running, my_priority, run_time, sleep_time):
+
+
+def func(lock, cur_running, my_priority):
     # let's run driver for 30 seconds:
-    RemoteDriver().set_lock(lock, cur_running, my_priority, run_time, sleep_time)
     
-    logger.info('Bored starting %s' % (fname))
-    thread.start_new_thread(start_proc, (fname,))
-
-
     while True:
-        time.sleep(5)
+        for (fname, run_time, sleep_time) in progs:
+            RemoteDriver().set_lock(lock, cur_running, my_priority, run_time, sleep_time)
+            
+            logger.info('Bored starting %s' % (fname))
+            thread.start_new_thread(start_proc, (fname,))
+             
 
-    end = time.time() + 30
-    while time.time() < end:
-        time.sleep(0.1)
-    
-    # should kill proc in 30 seconds or something
-    logger.info('Bored finished. Now what?')
 
-    time.sleep(100)
+            end = time.time() + run_time
+            while time.time() < end:
+                time.sleep(0.1)
+            logger.info('Bored: %s should be done' % (fname))
+            time.sleep(3) 
