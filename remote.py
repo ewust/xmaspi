@@ -19,11 +19,10 @@ class RemoteDriver(object):
         return cls._instance
 
  
-
+    lock = None
     def __init__(self, name=None, addr="141.212.110.237", port=4908):
         #Driver().
         # TOOD: call Driver().gimme_lock_info(self) (and implement it)
-        self.lock = None
         pass
 
     def go(self):
