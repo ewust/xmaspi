@@ -13,7 +13,7 @@ def start_proc(f):
 
 def func(lock, cur_running, my_priority):
     # let's run driver for 30 seconds:
-    RemoteDriver.set_lock(lock, cur_running, my_priority, 30, 1000)
+    RemoteDriver().set_lock(lock, cur_running, my_priority, 30, 1000)
     
     logger.info('Bored Sleeping for 5...')
     time.sleep(5)
