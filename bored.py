@@ -8,6 +8,7 @@ from remote import RemoteDriver
 import thread
 
 def start_proc(f):
+    logger.info('going to run %s' % f)
     execfile(f, globals())
     logger.info('hmm execfile returned, weird.')
 
@@ -18,7 +19,7 @@ def func(lock, cur_running, my_priority):
     logger.info('Bored Sleeping for 5...')
     time.sleep(5)
     logger.info("Bored...running remote (don't crash on me!)")
-    thread.start_new_thread(start_proc, ('remote.py',))
+    thread.start_new_thread(start_proc, ('remote-test.py',))
 
     end = time.time() + 30
     while time.time() < end:
