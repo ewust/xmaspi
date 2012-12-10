@@ -18,10 +18,10 @@ def start_proc(f):
 # (program, run time, sleep time, priority
 progs = [('./xmaspi-client/sine.py', 30, 90),\
     ('./xmaspi-client/snake.py', 30, 90),\
-    ('./xmaspi-client/wheel.py', 30, 90),\
-    ('./xmaspi-client/sort.py', 30, 90), \
-    ('./xmaspi-client/mergesort.py', 30, 150), \
-    ('./xmaspi-client/quicksort.py', 50, 100)]
+    #('./xmaspi-client/wheel.py', 30, 90),\
+    #('./xmaspi-client/sort.py', 30, 90), \
+    #('./xmaspi-client/mergesort.py', 30, 150), \
+    #('./xmaspi-client/quicksort.py', 50, 100)]
 
 
 
