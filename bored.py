@@ -30,9 +30,11 @@ def func(lock, cur_running, my_priority):
     # let's run driver for 30 seconds:
     
     while True:
+        idx = 0
         for (fname, run_time, sleep_time) in progs:
-            RemoteDriver().set_lock(lock, cur_running, my_priority, run_time, sleep_time)
+            RemoteDriver().set_lock(lock, cur_running, my_priority+idx, run_time, sleep_time)
             
+            idx += 1
             logger.info('Bored starting %s' % (fname))
             thread.start_new_thread(start_proc, (fname,))
              
@@ -43,3 +45,6 @@ def func(lock, cur_running, my_priority):
                 time.sleep(0.1)
             logger.info('Bored: %s should be done' % (fname))
             time.sleep(3) 
+
+        while True:
+            time.sleep(1000)
