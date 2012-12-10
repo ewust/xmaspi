@@ -85,7 +85,7 @@ Looking forward to your creations! :)
 
         # Block for controller here
         logger.debug("Remote me ('%s' %s:%d) acquiring lock..." % \
-            self.name, self.client_address[0], self.client_address[1])
+            (self.name, self.client_address[0], self.client_address[1]))
         glock.acquire()
         try:
             logger.info('Got lock; running %s (%s:%d)' % \
