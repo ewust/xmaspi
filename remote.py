@@ -33,7 +33,6 @@ class RemoteDriver(object):
     # Not called from the user's program, but rather the background process    
     def set_lock(self, lock, cur_running, my_priority, run_time, off_time):
         # Thanks!
-        print 'thanks, got lock'
         self.lock = lock
         self.cur_running = cur_running
         self.my_priority = my_priority
@@ -41,23 +40,19 @@ class RemoteDriver(object):
         self.off_time = off_time
         self.next_acquire_time = time.time()
         self.have_lock = False
+        self.driver = Driver()
 
     def write_led(self, led_id, brightness, red, green, blue):
         # every once in a while, we should release the lock
-        if self.lock == None:
-            print 'oh no! did not transfer'
-        logger.info('remote wrote led ')
         if time.time() > self.next_acquire_time:
             #if self.have_lock:
             #    self.lock.release()
-            logger.info('remote trying to acquire lock...')
             acquire_lock_priority(self.lock, self.cur_running, self.my_priority, self.run_time, self.off_time)
-            logger.info('got it')
             self.lock.release() # can't hold lock in case user calls sleep
             #self.have_lock = True # just true after the first time 
             self.next_acquire_time = time.time() + 1
     
-        Driver().write_led(led_id, brightness, blue, green, red)
+        self.driver.write_led(led_id, brightness, blue, green, red)
 
     def busy_wait(self, duration=None):
         if duration is None:
