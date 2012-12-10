@@ -91,6 +91,9 @@ class Driver(object):
             # Broadcast
             for s in range(self.num_strands):
                 self.send_pkt((s, 63), brightness, 0, 0, 0)
+        elif led_id == 100:
+            # nop
+            return
         else:
             # Unicast
             self.send_pkt(self.get_physical_addr(led_id), brightness, blue, green, red)
