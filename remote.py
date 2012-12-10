@@ -50,7 +50,7 @@ class RemoteDriver(object):
             acquire_lock_priority(self.lock, self.cur_running, self.my_priority, self.run_time, self.off_time)
             self.lock.release() # can't hold lock in case user calls sleep
             #self.have_lock = True # just true after the first time 
-            self.next_acquire_time = time.time() - 1 # do it every time
+            self.next_acquire_time = time.time() + 0.01
     
         self.driver.write_led(led_id, brightness, blue, green, red)
 
