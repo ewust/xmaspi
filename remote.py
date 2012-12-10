@@ -5,6 +5,7 @@ import time
 import sys
 import traceback
 import getpass
+import logger
 
 # This is a Shim between a xmaspi-client RemoteDriver
 # that adapts it to the local RaspberryPi Driver
@@ -47,7 +48,9 @@ class RemoteDriver(object):
         if time.time() > self.next_acquire_time:
             #if self.have_lock:
             #    self.lock.release()
+            logger.info('remote trying to acquire lock...')
             acquire_lock_priority(self.lock, self.cur_running, self.my_priority, self.run_time, self.off_time)
+            logger.info('got it')
             self.lock.release() # can't hold lock in case user calls sleep
             #self.have_lock = True # just true after the first time 
             self.next_acquire_time = time.time() + 1
