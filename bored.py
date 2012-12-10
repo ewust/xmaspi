@@ -20,10 +20,11 @@ def start_proc(fname, lock, cur_running, priority, run_time, sleep_time):
 # (program, run time, sleep time, priority
 progs = [('./xmaspi-client/sine.py', 30, 15),\
     ('./xmaspi-client/snake.py', 30, 30),\
-    #('./xmaspi-client/wheel.py', 30, 90),\
-    #('./xmaspi-client/sort.py', 30, 90), \
+    ('./xmaspi-client/wheel.py', 30, 90),\
+    ('./xmaspi-client/sort.py', 30, 90), \
     #('./xmaspi-client/mergesort.py', 30, 150), \
-    #('./xmaspi-client/quicksort.py', 50, 100)]
+    ('./xmaspi-client/quicksort.py', 50, 100), \
+    #('./xmaspi-client/clock.py', 60, 100)\
     ]
 
 
@@ -57,6 +58,6 @@ def func(lock, cur_running, my_priority):
 
             logger.info('Bored: %s should be done' % (fname))
             logger.info('cur_running: %d' % (cur_running.value))
-            time.sleep(3) 
+            time.sleep(10) 
 
             logger.info('cur_running: %d' % (cur_running.value))
