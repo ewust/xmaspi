@@ -3,15 +3,17 @@ import logger
 import time
 
 
-from multiprocessing import Lock, Value
+from multiprocessing import Lock, Value, Process
 from remote import RemoteDriver
 import thread
 
-def start_proc(f):
+def start_proc(fname, lock, cur_running, priority, run_time, sleep_time):
     logger.info('going to run %s' % f)
+    RemoteDriver().set_lock(lock, cur_running, priority, run_time, sleep_time)
     g = globals()
     g['__name__'] = '__main__'
-    execfile(f, g)
+    
+    execfile(fname, g)
     logger.info('hmm execfile returned, weird.')
 
 
@@ -31,21 +33,23 @@ def func(lock, cur_running, my_priority):
     
     while True:
         idx = 0
-        for (fname, run_time, sleep_time) in progs:
-            RemoteDriver().set_lock(lock, cur_running, my_priority+idx, run_time, sleep_time)
-            
+        for (fname, run_time, sleep_time) in progs: 
             idx += 1
-            logger.info('Bored starting %s' % (fname))
-            thread.start_new_thread(start_proc, (fname,))
-             
-
+            logger.info('Bored starting %s (prio %d)' % (fname, my_priority+idx))
+    
+            p_bored = Process(target=start_proc, args=(fname, lock, cur_running,my_priority+idx, run_time, sleep_time))
+            
+            p_bored.start()
+            #thread.start_new_thread(start_proc, (fname,))
+            
 
             end = time.time() + run_time
             while time.time() < end:
                 time.sleep(0.1)
+            p_bored.terminate()
+            # join?
             logger.info('Bored: %s should be done' % (fname))
+            logger.info('cur_running: %d' % (cur_running.value))
             time.sleep(3) 
 
-        while True:
-            time.sleep(5)
             logger.info('cur_running: %d' % (cur_running.value))
