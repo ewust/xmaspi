@@ -56,8 +56,4 @@ def func(lock, cur_running, my_priority):
                 cur_running.value = 0            
             lock.release()
 
-            logger.info('Bored: %s should be done' % (fname))
-            logger.info('cur_running: %d' % (cur_running.value))
             time.sleep(10) 
-
-            logger.info('cur_running: %d' % (cur_running.value))
