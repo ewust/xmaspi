@@ -5,9 +5,11 @@ import command_me
 import twitter
 import rainbow
 import bored
-
+import logger
 
 def main():
+    logger.setLogLevel(logger.DEBUG)
+
     l = Lock()
     cur_running = Value('d', 0)
     p_command_me = Process(target=command_me.func, args=(l,))
