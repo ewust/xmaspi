@@ -84,9 +84,11 @@ Looking forward to your creations! :)
         self.request.settimeout(1)
 
         # Block for controller here
+        logger.debug("Remote me ('%s' %s:%d) acquiring lock..." % \
+            (self.name, self.client_address[0], self.client_address[1]))
         glock.acquire()
         try:
-            logger.info('Running %s (%s:%d)' % \
+            logger.info('Got lock; running %s (%s:%d)' % \
                 (self.name, self.client_address[0], self.client_address[1]))
             self.request.sendall("Go Time!\n")
 
@@ -130,6 +132,8 @@ Looking forward to your creations! :)
             print '-'*60
             return
         finally:
+            logger.debug("Remote me ('%s' %s:%d) releasing lock..." % \
+                self.name, self.client_address[0], self.client_address[1])
             glock.release()
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):

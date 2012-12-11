@@ -10,6 +10,7 @@ import webcolors
 import traceback
 import socket
 import fcntl
+import logger
 SIOCGIFADDR = 0x8915
 import struct
 from api_keys import *
@@ -110,7 +111,10 @@ def tweet_response(api, mid, msg):
 
 
 def handle_new_mention(lock, api, mention):
+    logger.debug("Twitter (%s, %d) acquiring lock..." % \
+        (mention.user.screen_name, mention.id))
     lock.acquire()
+    
     try:
         tweet = str(mention.text).strip()
         sys.stdout.write('%s: \'%s\': ' % (mention.user.screen_name, tweet))
@@ -153,6 +157,8 @@ def handle_new_mention(lock, api, mention):
         traceback.print_exc(file=sys.stdout)
         print '-'*60
     finally:
+        logger.debug("Twitter (%s, %d) releasing lock..." % \
+            (mention.user.screen_name, mention.id))
         lock.release()
 
 
