@@ -45,15 +45,15 @@ class UdpDriver(object):
     def new_frame(self, data):
         buf = ''
         for i in range(NUM_LIGHTS):
-            new_state = data[4*i:4(i+1)]
+            new_state = data[4*i:4*(i+1)]
             # compare to current state
-            if new_state != state[i]:
-                state[i] = new_state
+            if new_state != self.state[i]:
+                self.state[i] = new_state
 
                 # write to /dev/xmas
-                buf += self.update_bulb(new_state)
+                buf += self.update_bulb(i, new_state)
         if buf != '':
-            self.f.write(f)
+            self.f.write(buf)
             self.f.flush()
         return buf != ''
 
@@ -63,5 +63,6 @@ if __name__ == '__main__':
     while True:
         data = d.get_latest_packet()
         if data != None:
+            print len(data)
             if len(data) == 400:
                 d.new_frame(data)
