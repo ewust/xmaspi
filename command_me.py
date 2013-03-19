@@ -133,7 +133,7 @@ Looking forward to your creations! :)
             return
         finally:
             logger.debug("Remote me ('%s' %s:%d) releasing lock..." % \
-                self.name, self.client_address[0], self.client_address[1])
+                (self.name, self.client_address[0], self.client_address[1]))
             glock.release()
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):

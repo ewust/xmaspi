@@ -20,7 +20,9 @@ def start_proc(fname, lock, cur_running, priority, run_time, sleep_time):
 # (program, run time, sleep time, priority
 progs = [('./xmaspi-client/sine.py', 30, 15),\
     ('./xmaspi-client/snake.py', 30, 30),\
+    ('./xmaspi-client/randomwalk.py', 30, 10), \
     ('./xmaspi-client/wheel.py', 30, 90),\
+    ('./xmaspi-client/waterfall.py', 30, 10), \
     ('./xmaspi-client/sort.py', 60, 90), \
     #('./xmaspi-client/mergesort.py', 30, 150), \
     ('./xmaspi-client/quicksort.py', 60, 100), \
