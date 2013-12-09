@@ -1,7 +1,9 @@
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/socket.h>
-#include <event/event2.h>
+#include <sys/types.h>
+#include <event2/event.h>
 #include <stdint.h>
 
 #define NUM_BULBS 100
@@ -50,16 +52,16 @@ void update_lights(struct state_st *state, char *buf)
     }
 }
 
-void cb_func(evutil_socket_t fd, short what, void *arg)
+void read_cb(evutil_socket_t fd, short what, void *arg)
 {
     struct state_st *state = arg;
     char buf[NUM_BULBS*4];
     struct sockaddr_in src_addr;
     socklen_t addr_len;
-    ssize_t len;
+    size_t len;
 
     do {
-        len = recvfrom(fd, buf, sizeof(buf), 0, &src_addr, &addr_len);
+        len = recvfrom(fd, buf, sizeof(buf), 0, (struct sockaddr*)&src_addr, &addr_len);
     } while (len == sizeof(buf));
 
     update_lights(state, buf);
@@ -75,7 +77,7 @@ int main(int argc, char *argv[])
     struct state_st state;
 
 
-    base = event_init();
+    base = event_base_new();
 
     init_led_addrs(&state);
     state.out_f = fopen("/dev/xmas", "r");
@@ -92,7 +94,7 @@ int main(int argc, char *argv[])
     sin.sin_family = AF_INET;
     sin.sin_port = htons(port);
 
-    if (bind(sock, (sturct sockaddr *)&sin, sizeof(sin)) < 0) {
+    if (bind(sock, (struct sockaddr *)&sin, sizeof(sin)) < 0) {
         perror("bind");
         exit(-1);
     }
@@ -100,7 +102,6 @@ int main(int argc, char *argv[])
     event_new(base, sock, EV_READ, read_cb, &state);
 
     event_base_dispatch(base);
-
 
     return 0;
 }
