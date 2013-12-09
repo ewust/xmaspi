@@ -36,7 +36,7 @@ class UdpDriver(object):
                 ret = data
             except socket.error:
                 if ret == None:
-                    select.select(self.sock, None, None)
+                    select.select([self.sock], [], [])
                     continue
                 #print 'data = %s' % data
                 return ret
