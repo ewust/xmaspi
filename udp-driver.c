@@ -7,12 +7,17 @@
 #include <stdint.h>
 
 #define NUM_BULBS 100
+#define DEV_XMAS "/dev/xmas"
 
 struct state_st
 {
     uint32_t bulbs[NUM_BULBS];  // brightness, red, green, blue as bytes
     uint8_t led_addrs[NUM_BULBS];
     FILE *out_f;
+
+    // Updates/sec
+    uint32_t frame_updates;
+    uint32_t bulb_updates;
 };
 
 // Translate a bulb's address (0-100) to a physical address (0-50 and strand)
@@ -49,6 +54,9 @@ void update_lights(struct state_st *state, char *buf)
         ssize_t update_len = (ptr - update_buf);
         fwrite(update_buf, update_len, 1, state->out_f);
         fflush(state->out_f);
+
+        state->bulb_updates += (update_len / 5);
+        state->frame_updates++;
     }
 }
 
@@ -67,6 +75,15 @@ void read_cb(evutil_socket_t fd, short what, void *arg)
     update_lights(state, buf);
 }
 
+void status_cb(evutil_socket_t fd, short what, void *arg)
+{
+    struct state_st *state = arg;
+    printf("%d frames/sec, %d bulbs/sec\n", state->frame_updates, state->bulb_updates);
+
+    state->frame_updates = 0;
+    state->bulb_updates = 0;
+}
+
 int main(int argc, char *argv[])
 {
 
@@ -80,8 +97,11 @@ int main(int argc, char *argv[])
     base = event_base_new();
 
     init_led_addrs(&state);
-    state.out_f = fopen("/dev/xmas", "r");
-
+    state.out_f = fopen(DEV_XMAS, "r");
+    if (state.out_f == NULL) {
+        perror("fopen");
+        exit(-1);
+    }
 
     sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock < 0) {
@@ -99,7 +119,12 @@ int main(int argc, char *argv[])
         exit(-1);
     }
 
-    event_new(base, sock, EV_READ, read_cb, &state);
+    struct event *ev = event_new(base, sock, EV_READ|EV_PERSIST, read_cb, &state);
+    event_add(ev, NULL);
+
+    struct timeval one_sec = {1, 0};
+    ev = event_new(base, 0, EV_PERSIST, status_cb, &state);
+    event_add(ev, &one_sec);
 
     event_base_dispatch(base);
 
