@@ -59,7 +59,7 @@ class UdpDriver(object):
 
 
 if __name__ == '__main__':
-    d = UdpDriver('/dev/null')
+    d = UdpDriver()
     while True:
         data = d.get_latest_packet()
         if data != None:
