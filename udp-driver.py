@@ -41,7 +41,7 @@ class UdpDriver(object):
     def update_bulb(self, idx, new_state):
         (brightness, r, g, b) = struct.unpack('BBBB', new_state)
         bulb_id = self.addr_to_phys_id[idx]
-        print 'idx %d -> id %d (%d, %d, %d, %d)' % (idx, bulb_id, brightness, r, g, b)
+        #print 'idx %d -> id %d (%d, %d, %d, %d)' % (idx, bulb_id, brightness, r, g, b)
         return chr(bulb_id) + chr(brightness) + chr(b) + chr(g) + chr(r)
 
     def new_frame(self, data):
