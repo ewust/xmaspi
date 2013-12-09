@@ -3,6 +3,8 @@ import socket
 import sys
 import time
 import struct
+import select
+
 
 NUM_LIGHTS = 100
 
@@ -33,6 +35,9 @@ class UdpDriver(object):
                 data,addr = self.sock.recvfrom(NUM_LIGHTS*4)
                 ret = data
             except socket.error:
+                if ret == None:
+                    select.select(self.sock, None, None)
+                    continue
                 #print 'data = %s' % data
                 return ret
 
