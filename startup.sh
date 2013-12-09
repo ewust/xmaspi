@@ -34,7 +34,7 @@ kill $pid
 
 ntpdate -ub 0.us.pool.ntp.org
 
-su xmaslights
-cd /home/xmaslights/xmaspi/
-./xmas.py &
+#su xmaslights
+#cd /home/xmaslights/xmaspi/
+#./xmas.py &
 
