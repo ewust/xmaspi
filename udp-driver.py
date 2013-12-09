@@ -20,9 +20,10 @@ class UdpDriver(object):
         self.addr_to_phys_id = [0]*NUM_LIGHTS
         for idx in range(NUM_LIGHTS):
             if idx < 50:
-                self.addr_to_phys_id[idx] = idx
+                self.addr_to_phys_id[idx] = 49-idx
             else:
-                self.addr_to_phys_id[idx] = (100-idx) | 0x40
+                self.addr_to_phys_id[idx] = (idx - 50) | 0x40
+                #self.addr_to_phys_id[idx] = (100-idx) | 0x40
 
 
     def get_latest_packet(self):
@@ -40,6 +41,7 @@ class UdpDriver(object):
     def update_bulb(self, idx, new_state):
         (brightness, r, g, b) = struct.unpack('BBBB', new_state)
         bulb_id = self.addr_to_phys_id[idx]
+        print 'idx %d -> id %d (%d, %d, %d, %d)' % (idx, bulb_id, brightness, r, g, b)
         return chr(bulb_id) + chr(brightness) + chr(b) + chr(g) + chr(r)
 
     def new_frame(self, data):
@@ -66,6 +68,5 @@ if __name__ == '__main__':
     while True:
         data = d.get_latest_packet()
         if data != None:
-            print len(data)
             if len(data) == 400:
                 d.new_frame(data)
