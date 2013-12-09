@@ -59,7 +59,10 @@ class UdpDriver(object):
 
 
 if __name__ == '__main__':
-    d = UdpDriver()
+    port = 1337
+    if len(sys.argv) > 1:
+        port = int(sys.argv[1])
+    d = UdpDriver(port=port)
     while True:
         data = d.get_latest_packet()
         if data != None:
