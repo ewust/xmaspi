@@ -13,13 +13,15 @@ STRAND_LEN = 50
 
 
 class UdpDriver(object):
-    def __init__(self, fname='/dev/xmas', port=1337):
+    def __init__(self, fname='/dev/null', port=1337):
         self.f = open(fname, 'w')
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.bind(('0.0.0.0', port))
         self.sock.setblocking(0)
         self.state = ['\x00\x00\x00\x00']*NUM_LIGHTS
         self.addr_to_phys_id = [0]*NUM_LIGHTS
+        self.bulbs = 0
+        self.frames = 0
         for idx in range(NUM_LIGHTS):
             if idx < 50:
                 self.addr_to_phys_id[idx] = 49-idx
@@ -47,6 +49,7 @@ class UdpDriver(object):
         (brightness, r, g, b) = struct.unpack('BBBB', new_state)
         bulb_id = self.addr_to_phys_id[idx]
         #print 'idx %d -> id %d (%d, %d, %d, %d)' % (idx, bulb_id, brightness, r, g, b)
+        self.bulbs += 1
         return chr(bulb_id) + chr(brightness) + chr(b) + chr(g) + chr(r)
 
     def new_frame(self, data):
@@ -62,6 +65,7 @@ class UdpDriver(object):
         if buf != '':
             self.f.write(buf)
             self.f.flush()
+        self.frames += 1
         return buf != ''
 
 
@@ -70,7 +74,14 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         port = int(sys.argv[1])
     d = UdpDriver(port=port)
+    last_time = time.time()
     while True:
+        if (time.time() - last_time) > 1:
+            print '%d frames/sec, %d bulbs/sec' % (d.frames, d.bulbs)
+            d.frames = 0
+            d.bulbs = 0
+            last_time = time.time()
+
         data = d.get_latest_packet()
         if data != None:
             if len(data) == 400:
