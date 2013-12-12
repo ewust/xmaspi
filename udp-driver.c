@@ -41,20 +41,32 @@ void update_lights(struct state_st *state, char *buf)
 {
     int i;
     uint32_t *bulbs_buf = (uint32_t*)buf;
-    char update_buf[NUM_BULBS*5];
-    char *ptr = update_buf;
+    //char update_buf[NUM_BULBS*5];
+    //char *ptr = update_buf;
+    char send_buf[5];
     for (i=0; i<NUM_BULBS; i++) {
         uint32_t new_state = ntohl(bulbs_buf[i]);
         if (state->bulbs[i] != new_state) {
+            send_buf[0] = state->led_addrs[i];
+            send_buf[1] = (new_state >> 24) & 0xff;      // brightness
+            send_buf[2] = (new_state >> 0) & 0xff;       // blue
+            send_buf[3] = (new_state >> 8) & 0xff;       // green
+            send_buf[4] = (new_state >> 16) & 0xff;      // red
+            /*
             *ptr++ = state->led_addrs[i];
             *ptr++ = (new_state >> 24) & 0xff;      // brightness
             *ptr++ = (new_state >> 0) & 0xff;       // blue
             *ptr++ = (new_state >> 8) & 0xff;       // green
             *ptr++ = (new_state >> 16) & 0xff;      // red
+            */
             state->bulbs[i] = new_state;
+            fwrite(send_buf, 5, 1, state->out_f);
+            fflush(state->out_f);
+            state->bulb_updates++;
         }
     }
-
+    state->frame_updates++;
+    /*
     if (ptr != update_buf) {
         ssize_t update_len = (ptr - update_buf);
         fwrite(update_buf, update_len, 1, state->out_f);
@@ -63,6 +75,7 @@ void update_lights(struct state_st *state, char *buf)
         state->bulb_updates += (update_len / 5);
         state->frame_updates++;
     }
+    */
 }
 
 void read_cb(struct bufferevent *bev, void *arg)
@@ -76,12 +89,13 @@ void read_cb(struct bufferevent *bev, void *arg)
     // TODO: use math and evbuffer_drain to save on copying
     while (evbuffer_get_length(input) >= sizeof(buf)) {
         evbuffer_remove(input, buf, sizeof(buf));
+        update_lights(state, buf);
         had_input = 1;
     }
 
-    if (had_input) {
-        update_lights(state, buf);
-    }
+    //if (had_input) {
+    //    update_lights(state, buf);
+    //}
 }
 
 void status_cb(evutil_socket_t fd, short what, void *arg)
