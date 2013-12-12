@@ -4,6 +4,9 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <event2/event.h>
+#include <event2/listener.h>
+#include <event2/bufferevent.h>
+#include <event2/buffer.h>
 #include <stdint.h>
 #include <string.h>
 
@@ -62,19 +65,23 @@ void update_lights(struct state_st *state, char *buf)
     }
 }
 
-void read_cb(evutil_socket_t fd, short what, void *arg)
+void read_cb(struct bufferevent *bev, void *arg)
 {
     struct state_st *state = arg;
     char buf[NUM_BULBS*4];
     struct sockaddr_in src_addr;
-    socklen_t addr_len;
-    size_t len;
+    struct evbuffer *input = bufferevent_get_input(bev);
+    int had_input = 0;
 
-    do {
-        len = recvfrom(fd, buf, sizeof(buf), 0, (struct sockaddr*)&src_addr, &addr_len);
-    } while (len == sizeof(buf));
+    // TODO: use math and evbuffer_drain to save on copying
+    while (evbuffer_get_length(input) >= sizeof(buf)) {
+        evbuffer_remove(input, buf, sizeof(buf));
+        had_input = 1;
+    }
 
-    update_lights(state, buf);
+    if (had_input) {
+        update_lights(state, buf);
+    }
 }
 
 void status_cb(evutil_socket_t fd, short what, void *arg)
@@ -96,7 +103,7 @@ accept_conn_cb(struct evconnlistener *listener,
         struct bufferevent *bev = bufferevent_socket_new(
                 base, fd, BEV_OPT_CLOSE_ON_FREE);
 
-        bufferevent_setcb(bev, echo_read_cb, NULL, echo_event_cb, state);
+        bufferevent_setcb(bev, read_cb, NULL, NULL, state);
 
         bufferevent_enable(bev, EV_READ|EV_WRITE);
 }
@@ -135,7 +142,7 @@ int main(int argc, char *argv[])
     sin.sin_port = htons(port);
 
 
-    listener = evconnlistener_new_bind(base, accept_conn_cb, NULL,
+    listener = evconnlistener_new_bind(base, accept_conn_cb, &state,
             LEV_OPT_CLOSE_ON_FREE|LEV_OPT_REUSEABLE, -1,
             (struct sockaddr*)&sin, sizeof(sin));
 
@@ -150,9 +157,8 @@ int main(int argc, char *argv[])
     event_add(ev, NULL);
 */
 
-    
     struct timeval one_sec = {1, 0};
-    ev = event_new(base, 0, EV_PERSIST, status_cb, &state);
+    struct event *ev = event_new(base, 0, EV_PERSIST, status_cb, &state);
     event_add(ev, &one_sec);
 
     event_base_dispatch(base);
