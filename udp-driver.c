@@ -94,6 +94,7 @@ int main(int argc, char *argv[])
     int port = 1337;
     struct sockaddr_in sin;
     struct state_st state;
+    struct evconnlistener *listener;
 
     memset(&sin, 0, sizeof(sin));
 
@@ -117,6 +118,13 @@ int main(int argc, char *argv[])
     sin.sin_family = AF_INET;
     sin.sin_port = htons(port);
 
+
+    listener = evconnlistener_new_bind(base, accept_conn_cb, NULL,
+            LEV_OPT_CLOSE_ON_FREE|LEV_OPT_REUSEABLE, -1,
+            (struct sockaddr*)&sin, sizeof(sin));
+
+
+/*
     if (bind(sock, (struct sockaddr *)&sin, sizeof(sin)) < 0) {
         perror("bind");
         exit(-1);
@@ -124,7 +132,9 @@ int main(int argc, char *argv[])
 
     struct event *ev = event_new(base, sock, EV_READ|EV_PERSIST, read_cb, &state);
     event_add(ev, NULL);
+*/
 
+    
     struct timeval one_sec = {1, 0};
     ev = event_new(base, 0, EV_PERSIST, status_cb, &state);
     event_add(ev, &one_sec);
