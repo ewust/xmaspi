@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <event2/event.h>
 #include <stdint.h>
+#include <string.h>
 
 #define NUM_BULBS 100
 #define DEV_XMAS "/dev/xmas"
@@ -40,13 +41,14 @@ void update_lights(struct state_st *state, char *buf)
     char update_buf[NUM_BULBS*5];
     char *ptr = update_buf;
     for (i=0; i<NUM_BULBS; i++) {
-        uint32_t new_state = bulbs_buf[i];
+        uint32_t new_state = ntohl(bulbs_buf[i]);
         if (state->bulbs[i] != new_state) {
             *ptr++ = state->led_addrs[i];
             *ptr++ = (new_state >> 24) & 0xff;      // brightness
             *ptr++ = (new_state >> 0) & 0xff;       // blue
             *ptr++ = (new_state >> 8) & 0xff;       // green
             *ptr++ = (new_state >> 16) & 0xff;      // red
+            state->bulbs[i] = new_state;
         }
     }
 
@@ -93,11 +95,12 @@ int main(int argc, char *argv[])
     struct sockaddr_in sin;
     struct state_st state;
 
+    memset(&sin, 0, sizeof(sin));
 
     base = event_base_new();
 
     init_led_addrs(&state);
-    state.out_f = fopen(DEV_XMAS, "r");
+    state.out_f = fopen(DEV_XMAS, "w");
     if (state.out_f == NULL) {
         perror("fopen");
         exit(-1);
