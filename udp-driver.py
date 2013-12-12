@@ -13,7 +13,7 @@ STRAND_LEN = 50
 
 
 class UdpDriver(object):
-    def __init__(self, fname='/dev/null', port=1337):
+    def __init__(self, fname='/dev/xmas', port=1337):
         self.f = open(fname, 'w')
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.bind(('0.0.0.0', port))
