@@ -86,6 +86,22 @@ void status_cb(evutil_socket_t fd, short what, void *arg)
     state->bulb_updates = 0;
 }
 
+static void
+accept_conn_cb(struct evconnlistener *listener,
+    evutil_socket_t fd, struct sockaddr *address, int socklen,
+    void *arg)
+{
+        struct state_st *state = arg;
+        struct event_base *base = evconnlistener_get_base(listener);
+        struct bufferevent *bev = bufferevent_socket_new(
+                base, fd, BEV_OPT_CLOSE_ON_FREE);
+
+        bufferevent_setcb(bev, echo_read_cb, NULL, echo_event_cb, state);
+
+        bufferevent_enable(bev, EV_READ|EV_WRITE);
+}
+
+
 int main(int argc, char *argv[])
 {
 
