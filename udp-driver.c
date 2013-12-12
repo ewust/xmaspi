@@ -38,28 +38,25 @@ void update_lights(struct state_st *state, char *buf)
 {
     int i;
     uint32_t *bulbs_buf = (uint32_t*)buf;
-    char update_buf[NUM_BULBS*5];
-    char *ptr = update_buf;
+    char update_buf[5];
     for (i=0; i<NUM_BULBS; i++) {
         uint32_t new_state = ntohl(bulbs_buf[i]);
         if (state->bulbs[i] != new_state) {
-            *ptr++ = state->led_addrs[i];
-            *ptr++ = (new_state >> 24) & 0xff;      // brightness
-            *ptr++ = (new_state >> 0) & 0xff;       // blue
-            *ptr++ = (new_state >> 8) & 0xff;       // green
-            *ptr++ = (new_state >> 16) & 0xff;      // red
+            update_buf[0] = state->led_addrs[i];
+            update_buf[1] = (new_state >> 24) & 0xff;      // brightness
+            update_buf[2] = (new_state >> 0) & 0xff;       // blue
+            update_buf[3] = (new_state >> 8) & 0xff;       // green
+            update_buf[4] = (new_state >> 16) & 0xff;      // red
             state->bulbs[i] = new_state;
+
+            fwrite(update_buf, sizeof(update_buf), 1, state->out_f);
+            fflush(state->out_f);
+
+            state->bulb_updates++;
         }
     }
 
-    if (ptr != update_buf) {
-        ssize_t update_len = (ptr - update_buf);
-        fwrite(update_buf, update_len, 1, state->out_f);
-        fflush(state->out_f);
-
-        state->bulb_updates += (update_len / 5);
-        state->frame_updates++;
-    }
+    state->frame_updates++;
 }
 
 void read_cb(evutil_socket_t fd, short what, void *arg)
