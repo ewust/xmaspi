@@ -4,9 +4,6 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <event2/event.h>
-#include <event2/listener.h>
-#include <event2/bufferevent.h>
-#include <event2/buffer.h>
 #include <stdint.h>
 #include <string.h>
 
@@ -41,32 +38,20 @@ void update_lights(struct state_st *state, char *buf)
 {
     int i;
     uint32_t *bulbs_buf = (uint32_t*)buf;
-    //char update_buf[NUM_BULBS*5];
-    //char *ptr = update_buf;
-    char send_buf[5];
+    char update_buf[NUM_BULBS*5];
+    char *ptr = update_buf;
     for (i=0; i<NUM_BULBS; i++) {
         uint32_t new_state = ntohl(bulbs_buf[i]);
         if (state->bulbs[i] != new_state) {
-            send_buf[0] = state->led_addrs[i];
-            send_buf[1] = (new_state >> 24) & 0xff;      // brightness
-            send_buf[2] = (new_state >> 0) & 0xff;       // blue
-            send_buf[3] = (new_state >> 8) & 0xff;       // green
-            send_buf[4] = (new_state >> 16) & 0xff;      // red
-            /*
             *ptr++ = state->led_addrs[i];
             *ptr++ = (new_state >> 24) & 0xff;      // brightness
             *ptr++ = (new_state >> 0) & 0xff;       // blue
             *ptr++ = (new_state >> 8) & 0xff;       // green
             *ptr++ = (new_state >> 16) & 0xff;      // red
-            */
             state->bulbs[i] = new_state;
-            fwrite(send_buf, 5, 1, state->out_f);
-            fflush(state->out_f);
-            state->bulb_updates++;
         }
     }
-    state->frame_updates++;
-    /*
+
     if (ptr != update_buf) {
         ssize_t update_len = (ptr - update_buf);
         fwrite(update_buf, update_len, 1, state->out_f);
@@ -75,27 +60,21 @@ void update_lights(struct state_st *state, char *buf)
         state->bulb_updates += (update_len / 5);
         state->frame_updates++;
     }
-    */
 }
 
-void read_cb(struct bufferevent *bev, void *arg)
+void read_cb(evutil_socket_t fd, short what, void *arg)
 {
     struct state_st *state = arg;
     char buf[NUM_BULBS*4];
     struct sockaddr_in src_addr;
-    struct evbuffer *input = bufferevent_get_input(bev);
-    int had_input = 0;
+    socklen_t addr_len;
+    size_t len;
 
-    // TODO: use math and evbuffer_drain to save on copying
-    while (evbuffer_get_length(input) >= sizeof(buf)) {
-        evbuffer_remove(input, buf, sizeof(buf));
-        update_lights(state, buf);
-        had_input = 1;
-    }
+    do {
+        len = recvfrom(fd, buf, sizeof(buf), 0, (struct sockaddr*)&src_addr, &addr_len);
+    } while (len == sizeof(buf));
 
-    //if (had_input) {
-    //    update_lights(state, buf);
-    //}
+    update_lights(state, buf);
 }
 
 void status_cb(evutil_socket_t fd, short what, void *arg)
@@ -106,22 +85,6 @@ void status_cb(evutil_socket_t fd, short what, void *arg)
     state->frame_updates = 0;
     state->bulb_updates = 0;
 }
-
-static void
-accept_conn_cb(struct evconnlistener *listener,
-    evutil_socket_t fd, struct sockaddr *address, int socklen,
-    void *arg)
-{
-        struct state_st *state = arg;
-        struct event_base *base = evconnlistener_get_base(listener);
-        struct bufferevent *bev = bufferevent_socket_new(
-                base, fd, BEV_OPT_CLOSE_ON_FREE);
-
-        bufferevent_setcb(bev, read_cb, NULL, NULL, state);
-
-        bufferevent_enable(bev, EV_READ|EV_WRITE);
-}
-
 
 int main(int argc, char *argv[])
 {
@@ -153,7 +116,6 @@ int main(int argc, char *argv[])
 
     sin.sin_family = AF_INET;
     sin.sin_port = htons(port);
-
 
     if (bind(sock, (struct sockaddr *)&sin, sizeof(sin)) < 0) {
         perror("bind");
