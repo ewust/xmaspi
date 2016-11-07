@@ -6,6 +6,7 @@
 #include <event2/event.h>
 #include <stdint.h>
 #include <string.h>
+#include <unistd.h>
 
 #define NUM_BULBS 100
 #define DEV_XMAS "/dev/xmas"
@@ -95,6 +96,10 @@ int main(int argc, char *argv[])
     memset(&sin, 0, sizeof(sin));
 
     base = event_base_new();
+
+    while (access(DEV_XMAS, F_OK) == -1) {
+        sleep(1);
+    }
 
     init_led_addrs(&state);
     state.out_f = fopen(DEV_XMAS, "w");
