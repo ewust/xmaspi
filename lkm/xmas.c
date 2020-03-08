@@ -1,10 +1,6 @@
-#define __KERNEL__
-#define MODULE
-
-#include <linux/module.h>  
-#include <linux/slab.h>
-#include "../include/asm/uaccess.h"
-#include <linux/fs.h>
+#include <linux/init.h>
+#include <linux/module.h>
+#include <linux/uaccess.h>
 #include <linux/delay.h>
 #include <linux/gpio.h>
 
@@ -12,7 +8,7 @@ static ssize_t xmas_write(struct file *, const char *, size_t, loff_t *);
 
 static int xmas_major;
 #define DEVICE_NAME "xmas"
-#define XMAS_OUT_0 17 // TODO: make this a module param
+#define XMAS_OUT_0 17 // TODO: make these module params
 #define XMAS_OUT_1 18
 
 /* Functions for character device */
@@ -73,7 +69,7 @@ void cleanup_module()
 static ssize_t
 xmas_write(struct file *filp, const char *in_buf, size_t len, loff_t * off)
 {
-    unsigned char *buf = in_buf;
+    const unsigned char *buf = in_buf;
 
     unsigned char cur_buf[5];
     int out_len = 0;
@@ -146,5 +142,5 @@ xmas_write(struct file *filp, const char *in_buf, size_t len, loff_t * off)
 
 
 MODULE_AUTHOR("Eric Wustrow");
-MODULE_DESCRIPTION("Bit-bang GPIO 17 to drive xmas LEDs ");
+MODULE_DESCRIPTION("Bit-bang GPIO 17 and 18 to drive xmas LEDs ");
 MODULE_LICENSE("GPL");

@@ -125,6 +125,10 @@ accept_conn_cb(struct evconnlistener *listener,
 
 int main(int argc, char *argv[])
 {
+    int verbose = 0;
+    if (argc == 2 && !strcmp(argv[1], "-v")) {
+        verbose = 1;
+    }
 
     struct event_base *base;
     int sock;
@@ -171,9 +175,11 @@ int main(int argc, char *argv[])
     event_add(ev, NULL);
 */
 
-    struct timeval one_sec = {1, 0};
-    struct event *ev = event_new(base, 0, EV_PERSIST, status_cb, &state);
-    event_add(ev, &one_sec);
+    if (verbose) {
+        struct timeval one_sec = {1, 0};
+        struct event *ev = event_new(base, 0, EV_PERSIST, status_cb, &state);
+        event_add(ev, &one_sec);
+    }
 
     event_base_dispatch(base);
 
