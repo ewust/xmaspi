@@ -19,14 +19,14 @@ while [ 1 ]; do
 
         ((n=n+1))
         if [[ "$n" -gt 300 ]]; then
-            logger -s "Network didn't come up, rebooting"
+            echo "Network didn't come up, rebooting"
             reboot
         fi
         curl -s "$hello" > /dev/null
         r=`echo $?`
     done
 
-    logger -s "Network is up"
+    echo "Network is up"
 
     for i in `seq 1 5`; do
         ./set_all.py 0 0 0 0
@@ -41,6 +41,6 @@ while [ 1 ]; do
         r=`echo $?`
     done
 
-    logger -s "Network is down"
+    echo "Network is down"
 
 done
