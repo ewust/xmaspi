@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Network watchdog
+#
+# Report IP address using the server API.
+# If connectivity is lost, blink warning pattern. Reboot if it isn't restored soon.
+
 hello="https://blinken.org/api/0/hello-pi"
 while [ 1 ]; do
 
@@ -7,9 +12,9 @@ while [ 1 ]; do
     curl -s "$hello" > /dev/null
     r=`echo $?`
     while [[ $r -ne 0 ]]; do
-        ./all_on.py 0 0 0 0
+        ./set_all.py 0 0 0 0
         sleep .5
-        ./all_on.py 128 13 0 0
+        ./set_all.py 128 13 0 0
 	sleep .5
 
         ((n=n+1))
@@ -21,21 +26,21 @@ while [ 1 ]; do
         r=`echo $?`
     done
 
-    echo Network is up
+    logger -s "Network is up"
 
     for i in `seq 1 5`; do
-        ./all_on.py 0 0 0 0
+        ./set_all.py 0 0 0 0
         sleep .1
-        ./all_on.py 100 0 13 0
+        ./set_all.py 100 0 13 0
         sleep .1
     done
 
     while [[ $r -eq 0 ]]; do
-        sleep 300
+        sleep 900
         curl -s "$hello" > /dev/null
         r=`echo $?`
     done
 
-    echo Network is down
+    logger -s "Network is down"
 
 done

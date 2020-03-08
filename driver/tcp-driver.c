@@ -138,6 +138,7 @@ int main(int argc, char *argv[])
     struct evconnlistener *listener;
 
     memset(&sin, 0, sizeof(sin));
+    memset(&state, 0, sizeof(struct state_st));
 
     base = event_base_new();
 
