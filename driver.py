@@ -1,6 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 STRAND_LEN = 50
+DRIVER = '/dev/xmas'
 
 # Keeps a mapping between LED Ids (0-N*50) to (strand, addr) pairs
 class Driver(object):
@@ -10,9 +11,8 @@ class Driver(object):
     buf = None
     def __new__(cls, *args, **kwargs):
         if not cls._instance:
-            cls._instance = super(Driver, cls).__new__(
-                                cls, *args, **kwargs)
-            cls.f = open('/dev/xmas', 'w')
+            cls._instance = super(Driver, cls).__new__(cls)
+            cls.f = open(DRIVER, 'wb')
             cls.buf = ''
         return cls._instance
 
@@ -21,7 +21,6 @@ class Driver(object):
     # A strand with a -1 orientation will address 
     def __init__(self, strand_orientations=[-1, 1], \
                  strand_order=[0, 1], do_init=False):
-        
         self.num_strands = 1
         if strand_orientations != None:
             self.num_strands = len(strand_orientations)
@@ -58,7 +57,7 @@ class Driver(object):
                 led_id += 1
  
     def buffer_pkt(self, phys_addr, brightness, green, blue, red):
-        self.buf += chr((phys_addr[0] << 6) | phys_addr[1]) + chr(brightness) + chr(green) + chr(blue) + chr(red)
+        self.buf += bytes([(phys_addr[0] << 6) | phys_addr[1], brightness, green, blue, red])
 
     def flush_buffer(self):
         self.f.write(self.buf)
@@ -66,7 +65,7 @@ class Driver(object):
         self.buf = ''
 
     def send_pkt(self, phys_addr, brightness, green, blue, red):
-        self.f.write(chr((phys_addr[0] << 6) | phys_addr[1]) + chr(brightness) + chr(green) + chr(blue) + chr(red))
+        self.f.write(bytes([(phys_addr[0] << 6) | phys_addr[1], brightness, green, blue, red]))
         self.f.flush()
 
     # get a physical address tuple from an LED ID
@@ -99,7 +98,7 @@ class Driver(object):
             self.send_pkt(self.get_physical_addr(led_id), brightness, blue, green, red)
 
 if __name__=="__main__":
-    # Test
+    # Initialize strand
     import time
     import sys
     d = Driver([-1, 1], [0, 1], len(sys.argv)==1)

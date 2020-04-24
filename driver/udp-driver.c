@@ -86,6 +86,10 @@ void status_cb(evutil_socket_t fd, short what, void *arg)
 
 int main(int argc, char *argv[])
 {
+    int verbose = 0;
+    if (argc == 2 && !strcmp(argv[1], "-v")) {
+        verbose = 1;
+    }
 
     struct event_base *base;
     int sock;
@@ -94,6 +98,7 @@ int main(int argc, char *argv[])
     struct state_st state;
 
     memset(&sin, 0, sizeof(sin));
+    memset(&state, 0, sizeof(struct state_st));
 
     base = event_base_new();
 
@@ -127,9 +132,11 @@ int main(int argc, char *argv[])
     struct event *ev = event_new(base, sock, EV_READ|EV_PERSIST, read_cb, &state);
     event_add(ev, NULL);
 
-    struct timeval one_sec = {1, 0};
-    ev = event_new(base, 0, EV_PERSIST, status_cb, &state);
-    event_add(ev, &one_sec);
+    if (verbose) {
+        struct timeval one_sec = {1, 0};
+        ev = event_new(base, 0, EV_PERSIST, status_cb, &state);
+        event_add(ev, &one_sec);
+    }
 
     event_base_dispatch(base);
 
