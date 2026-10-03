@@ -1,174 +1,92 @@
+#include "lights.h"
 
+#include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <event2/buffer.h>
+#include <event2/bufferevent.h>
 #include <event2/event.h>
 #include <event2/listener.h>
-#include <event2/bufferevent.h>
-#include <event2/buffer.h>
-#include <stdint.h>
-#include <string.h>
 
-#define NUM_BULBS 100
-#define DEV_XMAS "/dev/xmas"
-
-struct state_st
+// The stream is a sequence of full frames. Apply only the newest
+// complete one so the lights don't fall behind the sender.
+static void read_cb(struct bufferevent *bev, void *arg)
 {
-    uint32_t bulbs[NUM_BULBS];  // brightness, red, green, blue as bytes
-    uint8_t led_addrs[NUM_BULBS];
-    FILE *out_f;
-
-    // Updates/sec
-    uint32_t frame_updates;
-    uint32_t bulb_updates;
-};
-
-// Translate a bulb's address (0-100) to a physical address (0-50 and strand)
-void init_led_addrs(struct state_st *state)
-{
-    int i;
-    for (i=0; i<NUM_BULBS; i++) {
-        if (i < 50) {
-            state->led_addrs[i] = 49 - i;
-        } else {
-            state->led_addrs[i] = (i - 50) | 0x40;
-        }
-    }
-}
-
-void update_lights(struct state_st *state, char *buf)
-{
-    int i;
-    uint32_t *bulbs_buf = (uint32_t*)buf;
-    // Send all changed bulbs in one write so the kernel driver
-    // can update both strands simultaneously
-    char update_buf[NUM_BULBS*5];
-    char *ptr = update_buf;
-    for (i=0; i<NUM_BULBS; i++) {
-        uint32_t new_state = ntohl(bulbs_buf[i]);
-        if (state->bulbs[i] != new_state) {
-            *ptr++ = state->led_addrs[i];
-            *ptr++ = (new_state >> 24) & 0xff;      // brightness
-            *ptr++ = (new_state >> 0) & 0xff;       // blue
-            *ptr++ = (new_state >> 8) & 0xff;       // green
-            *ptr++ = (new_state >> 16) & 0xff;      // red
-            state->bulbs[i] = new_state;
-
-            state->bulb_updates++;
-        }
-    }
-
-    if (ptr != update_buf) {
-        fwrite(update_buf, ptr - update_buf, 1, state->out_f);
-        fflush(state->out_f);
-    }
-
-    state->frame_updates++;
-}
-
-void read_cb(struct bufferevent *bev, void *arg)
-{
-    struct state_st *state = arg;
-    char buf[NUM_BULBS*4];
-    struct sockaddr_in src_addr;
+    struct lights *lights = arg;
     struct evbuffer *input = bufferevent_get_input(bev);
-    int had_input = 0;
+    size_t frames = evbuffer_get_length(input) / FRAME_STATE_LEN;
+    uint8_t buf[FRAME_STATE_LEN];
 
-    // TODO: use math and evbuffer_drain to save on copying
-    while (evbuffer_get_length(input) >= sizeof(buf)) {
-        evbuffer_remove(input, buf, sizeof(buf));
-        update_lights(state, buf);
-        had_input = 1;
+    if (frames == 0) {
+        return;
     }
 
-    //if (had_input) {
-    //    update_lights(state, buf);
-    //}
+    evbuffer_drain(input, (frames - 1) * FRAME_STATE_LEN);
+    evbuffer_remove(input, buf, sizeof(buf));
+    update_lights(lights, buf);
 }
 
-void status_cb(evutil_socket_t fd, short what, void *arg)
+static void event_cb(struct bufferevent *bev, short what, void *arg)
 {
-    struct state_st *state = arg;
-    printf("%d frames/sec, %d bulbs/sec\n", state->frame_updates, state->bulb_updates);
-
-    state->frame_updates = 0;
-    state->bulb_updates = 0;
+    if (what & (BEV_EVENT_EOF | BEV_EVENT_ERROR)) {
+        bufferevent_free(bev);
+    }
 }
 
-static void
-accept_conn_cb(struct evconnlistener *listener,
-    evutil_socket_t fd, struct sockaddr *address, int socklen,
-    void *arg)
+static void accept_conn_cb(struct evconnlistener *listener,
+                           evutil_socket_t fd, struct sockaddr *address,
+                           int socklen, void *arg)
 {
-        struct state_st *state = arg;
-        struct event_base *base = evconnlistener_get_base(listener);
-        struct bufferevent *bev = bufferevent_socket_new(
-                base, fd, BEV_OPT_CLOSE_ON_FREE);
+    struct lights *lights = arg;
+    struct event_base *base = evconnlistener_get_base(listener);
+    struct bufferevent *bev = bufferevent_socket_new(
+            base, fd, BEV_OPT_CLOSE_ON_FREE);
 
-        bufferevent_setcb(bev, read_cb, NULL, NULL, state);
+    if (bev == NULL) {
+        fprintf(stderr, "Could not create bufferevent\n");
+        evutil_closesocket(fd);
+        return;
+    }
 
-        bufferevent_enable(bev, EV_READ|EV_WRITE);
+    bufferevent_setcb(bev, read_cb, NULL, event_cb, lights);
+    bufferevent_enable(bev, EV_READ);
 }
-
 
 int main(int argc, char *argv[])
 {
-    int verbose = 0;
-    if (argc == 2 && !strcmp(argv[1], "-v")) {
-        verbose = 1;
-    }
-
+    struct options opts;
+    struct lights lights;
     struct event_base *base;
-    int sock;
-    int port = 1337;
-    struct sockaddr_in sin;
-    struct state_st state;
     struct evconnlistener *listener;
+    struct sockaddr_in sin;
 
-    memset(&sin, 0, sizeof(sin));
-    memset(&state, 0, sizeof(struct state_st));
+    parse_options(argc, argv, &opts);
+    lights_init(&lights);
 
     base = event_base_new();
-
-    init_led_addrs(&state);
-    state.out_f = fopen(DEV_XMAS, "w");
-    if (state.out_f == NULL) {
-        perror("fopen");
-        exit(-1);
+    if (base == NULL) {
+        fprintf(stderr, "Could not create event base\n");
+        exit(EXIT_FAILURE);
     }
 
-    sock = socket(AF_INET, SOCK_DGRAM, 0);
-    if (sock < 0) {
-        perror("socket");
-        exit(-1);
-    }
-
-    evutil_make_socket_nonblocking(sock);
-
+    memset(&sin, 0, sizeof(sin));
     sin.sin_family = AF_INET;
-    sin.sin_port = htons(port);
+    sin.sin_addr.s_addr = htonl(INADDR_ANY);
+    sin.sin_port = htons(opts.port);
 
-
-    listener = evconnlistener_new_bind(base, accept_conn_cb, &state,
-            LEV_OPT_CLOSE_ON_FREE|LEV_OPT_REUSEABLE, -1,
+    listener = evconnlistener_new_bind(base, accept_conn_cb, &lights,
+            LEV_OPT_CLOSE_ON_FREE|LEV_OPT_CLOSE_ON_EXEC|LEV_OPT_REUSEABLE, -1,
             (struct sockaddr*)&sin, sizeof(sin));
-
-
-/*
-    if (bind(sock, (struct sockaddr *)&sin, sizeof(sin)) < 0) {
-        perror("bind");
-        exit(-1);
+    if (listener == NULL) {
+        perror("evconnlistener_new_bind");
+        exit(EXIT_FAILURE);
     }
 
-    struct event *ev = event_new(base, sock, EV_READ|EV_PERSIST, read_cb, &state);
-    event_add(ev, NULL);
-*/
-
-    if (verbose) {
-        struct timeval one_sec = {1, 0};
-        struct event *ev = event_new(base, 0, EV_PERSIST, status_cb, &state);
-        event_add(ev, &one_sec);
+    if (opts.verbose) {
+        lights_add_status_timer(&lights, base);
     }
 
     event_base_dispatch(base);

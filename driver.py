@@ -98,10 +98,10 @@ class Driver(object):
             self.send_pkt(self.get_physical_addr(led_id), brightness, blue, green, red)
 
 if __name__=="__main__":
-    # Initialize strand
+    # Bulb addresses are assigned by the kernel module at load
     import time
     import sys
-    d = Driver([-1, 1], [0, 1], len(sys.argv)==1)
+    d = Driver([-1, 1], [0, 1])
 
     if len(sys.argv) == 1:
         d.write_led(0, 200, 15, 0, 0)

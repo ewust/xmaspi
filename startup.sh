@@ -4,7 +4,7 @@ echo Loading kernel module
 
 ( cd lkm ; ./setup.sh )
 
-echo Initializing strand
+echo Testing strands
 
 ./driver.py
 

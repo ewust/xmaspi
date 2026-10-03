@@ -1,146 +1,90 @@
+#include "lights.h"
 
+#include <errno.h>
+#include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <event2/event.h>
-#include <stdint.h>
-#include <string.h>
-#include <unistd.h>
 
-#define NUM_BULBS 100
-#define DEV_XMAS "/dev/xmas"
-
-struct state_st
+// Each datagram is one full frame. Skip ahead to the newest queued
+// frame so the lights don't fall behind the sender.
+static void read_cb(evutil_socket_t fd, short what, void *arg)
 {
-    uint32_t bulbs[NUM_BULBS];  // brightness, red, green, blue as bytes
-    uint8_t led_addrs[NUM_BULBS];
-    FILE *out_f;
+    struct lights *lights = arg;
+    uint8_t buf[FRAME_STATE_LEN];
+    uint8_t latest[FRAME_STATE_LEN];
+    int have_frame = 0;
+    ssize_t len;
 
-    // Updates/sec
-    uint32_t frame_updates;
-    uint32_t bulb_updates;
-};
-
-// Translate a bulb's address (0-100) to a physical address (0-50 and strand)
-void init_led_addrs(struct state_st *state)
-{
-    int i;
-    for (i=0; i<NUM_BULBS; i++) {
-        if (i < 50) {
-            state->led_addrs[i] = 49 - i;
-        } else {
-            state->led_addrs[i] = (i - 50) | 0x40;
+    for (;;) {
+        len = recv(fd, buf, sizeof(buf), 0);
+        if (len < 0) {
+            if (errno == EINTR) {
+                continue;
+            }
+            if (errno != EAGAIN && errno != EWOULDBLOCK) {
+                perror("recv");
+            }
+            break;
         }
-    }
-}
-
-void update_lights(struct state_st *state, char *buf)
-{
-    int i;
-    uint32_t *bulbs_buf = (uint32_t*)buf;
-    // Send all changed bulbs in one write so the kernel driver
-    // can update both strands simultaneously
-    char update_buf[NUM_BULBS*5];
-    char *ptr = update_buf;
-    for (i=0; i<NUM_BULBS; i++) {
-        uint32_t new_state = ntohl(bulbs_buf[i]);
-        if (state->bulbs[i] != new_state) {
-            *ptr++ = state->led_addrs[i];
-            *ptr++ = (new_state >> 24) & 0xff;      // brightness
-            *ptr++ = (new_state >> 0) & 0xff;       // blue
-            *ptr++ = (new_state >> 8) & 0xff;       // green
-            *ptr++ = (new_state >> 16) & 0xff;      // red
-            state->bulbs[i] = new_state;
-
-            state->bulb_updates++;
+        if (len == sizeof(buf)) {
+            memcpy(latest, buf, sizeof(latest));
+            have_frame = 1;
         }
     }
 
-    if (ptr != update_buf) {
-        fwrite(update_buf, ptr - update_buf, 1, state->out_f);
-        fflush(state->out_f);
+    if (have_frame) {
+        update_lights(lights, latest);
     }
-
-    state->frame_updates++;
-}
-
-void read_cb(evutil_socket_t fd, short what, void *arg)
-{
-    struct state_st *state = arg;
-    char buf[NUM_BULBS*4];
-    struct sockaddr_in src_addr;
-    socklen_t addr_len;
-    size_t len;
-
-    do {
-        len = recvfrom(fd, buf, sizeof(buf), 0, (struct sockaddr*)&src_addr, &addr_len);
-    } while (len == sizeof(buf));
-
-    update_lights(state, buf);
-}
-
-void status_cb(evutil_socket_t fd, short what, void *arg)
-{
-    struct state_st *state = arg;
-    printf("%d frames/sec, %d bulbs/sec\n", state->frame_updates, state->bulb_updates);
-
-    state->frame_updates = 0;
-    state->bulb_updates = 0;
 }
 
 int main(int argc, char *argv[])
 {
-    int verbose = 0;
-    if (argc == 2 && !strcmp(argv[1], "-v")) {
-        verbose = 1;
-    }
-
+    struct options opts;
+    struct lights lights;
     struct event_base *base;
-    int sock;
-    int port = 1337;
+    struct event *ev;
     struct sockaddr_in sin;
-    struct state_st state;
+    evutil_socket_t sock;
 
-    memset(&sin, 0, sizeof(sin));
-    memset(&state, 0, sizeof(struct state_st));
+    parse_options(argc, argv, &opts);
+    lights_init(&lights);
 
     base = event_base_new();
-
-    while (access(DEV_XMAS, F_OK) == -1) {
-        sleep(1);
-    }
-
-    init_led_addrs(&state);
-    state.out_f = fopen(DEV_XMAS, "w");
-    if (state.out_f == NULL) {
-        perror("fopen");
-        exit(-1);
+    if (base == NULL) {
+        fprintf(stderr, "Could not create event base\n");
+        exit(EXIT_FAILURE);
     }
 
     sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock < 0) {
         perror("socket");
-        exit(-1);
+        exit(EXIT_FAILURE);
     }
-
     evutil_make_socket_nonblocking(sock);
+    evutil_make_socket_closeonexec(sock);
 
+    memset(&sin, 0, sizeof(sin));
     sin.sin_family = AF_INET;
-    sin.sin_port = htons(port);
+    sin.sin_addr.s_addr = htonl(INADDR_ANY);
+    sin.sin_port = htons(opts.port);
 
     if (bind(sock, (struct sockaddr *)&sin, sizeof(sin)) < 0) {
         perror("bind");
-        exit(-1);
+        exit(EXIT_FAILURE);
     }
 
-    struct event *ev = event_new(base, sock, EV_READ|EV_PERSIST, read_cb, &state);
-    event_add(ev, NULL);
+    ev = event_new(base, sock, EV_READ|EV_PERSIST, read_cb, &lights);
+    if (ev == NULL || event_add(ev, NULL) < 0) {
+        fprintf(stderr, "Could not add read event\n");
+        exit(EXIT_FAILURE);
+    }
 
-    if (verbose) {
-        struct timeval one_sec = {1, 0};
-        ev = event_new(base, 0, EV_PERSIST, status_cb, &state);
-        event_add(ev, &one_sec);
+    if (opts.verbose) {
+        lights_add_status_timer(&lights, base);
     }
 
     event_base_dispatch(base);

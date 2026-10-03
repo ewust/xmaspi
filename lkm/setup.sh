@@ -1,7 +1,6 @@
 #!/bin/bash
 
-# load kernel module and create character device
-insmod xmas.ko
-major=`awk "\\$2==\"xmas\" {print \\$1}" /proc/devices`
-mknod /dev/xmas c $major 0
+# Load kernel module; it creates /dev/xmas itself.
+# Pass e.g. strand0_gpio=17 strand1_gpio=18 to override the pins.
+insmod "$(dirname "$0")/xmas.ko" "$@"
 chmod 222 /dev/xmas

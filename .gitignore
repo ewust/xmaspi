@@ -1,1 +1,16 @@
 *.pyc
+
+# userspace drivers
+driver/*.o
+driver/udp-driver
+driver/tcp-driver
+
+# kernel module build
+lkm/*.ko
+lkm/*.o
+lkm/*.mod
+lkm/*.mod.c
+lkm/.*.cmd
+lkm/Module.symvers
+lkm/modules.order
+lkm/.tmp_versions/
