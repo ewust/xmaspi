@@ -39,22 +39,27 @@ void update_lights(struct state_st *state, char *buf)
 {
     int i;
     uint32_t *bulbs_buf = (uint32_t*)buf;
-    char update_buf[5];
+    // Send all changed bulbs in one write so the kernel driver
+    // can update both strands simultaneously
+    char update_buf[NUM_BULBS*5];
+    char *ptr = update_buf;
     for (i=0; i<NUM_BULBS; i++) {
         uint32_t new_state = ntohl(bulbs_buf[i]);
         if (state->bulbs[i] != new_state) {
-            update_buf[0] = state->led_addrs[i];
-            update_buf[1] = (new_state >> 24) & 0xff;      // brightness
-            update_buf[2] = (new_state >> 0) & 0xff;       // blue
-            update_buf[3] = (new_state >> 8) & 0xff;       // green
-            update_buf[4] = (new_state >> 16) & 0xff;      // red
+            *ptr++ = state->led_addrs[i];
+            *ptr++ = (new_state >> 24) & 0xff;      // brightness
+            *ptr++ = (new_state >> 0) & 0xff;       // blue
+            *ptr++ = (new_state >> 8) & 0xff;       // green
+            *ptr++ = (new_state >> 16) & 0xff;      // red
             state->bulbs[i] = new_state;
-
-            fwrite(update_buf, sizeof(update_buf), 1, state->out_f);
-            fflush(state->out_f);
 
             state->bulb_updates++;
         }
+    }
+
+    if (ptr != update_buf) {
+        fwrite(update_buf, ptr - update_buf, 1, state->out_f);
+        fflush(state->out_f);
     }
 
     state->frame_updates++;
