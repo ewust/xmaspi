@@ -6,8 +6,9 @@ each LED to a (strand, bulb address) pair. The kernel module assigns
 the bulb addresses when it loads, numbering each strand from the end
 nearest the Pi.
 
-Run with no arguments to play a test pattern, or with
-LED BRIGHTNESS RED GREEN BLUE to set a single LED.
+Run with no arguments to play a test pattern, with
+LED BRIGHTNESS RED GREEN BLUE to set a single LED, or with
+--set-all BRIGHTNESS RED GREEN BLUE to set every LED.
 """
 
 import argparse
@@ -114,6 +115,12 @@ class Driver:
                            red: int, green: int, blue: int):
         self.buf += self.frames(led_id, brightness, red, green, blue)
 
+    def set_all(self, brightness: int, red: int, green: int, blue: int):
+        """Set every LED, sending all updates in one write."""
+        for led_id in range(NUM_LEDS):
+            self.write_led_buffered(led_id, brightness, red, green, blue)
+        self.flush_buffer()
+
     def flush_buffer(self):
         self._write(self.buf)
         self.buf.clear()
@@ -134,26 +141,30 @@ def test_pattern(d: Driver):
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Set one LED, or with no arguments play a test pattern: '
-                    f'LED 0 blue, LED {NUM_LEDS - 1} red, then a magenta chase.')
-    parser.add_argument('led', nargs='?', type=int,
-                        help=f'LED ID 0-{NUM_LEDS - 1}, or {BROADCAST} for all (brightness only)')
-    parser.add_argument('brightness', nargs='?', type=int, help=f'0-{MAX_BRIGHTNESS}')
-    parser.add_argument('red', nargs='?', type=int, help=f'0-{MAX_COLOR}')
-    parser.add_argument('green', nargs='?', type=int, help=f'0-{MAX_COLOR}')
-    parser.add_argument('blue', nargs='?', type=int, help=f'0-{MAX_COLOR}')
+        usage='%(prog)s [-h] [LED | --set-all] [BRIGHTNESS RED GREEN BLUE]',
+        description='With no arguments, play a test pattern: '
+                    f'LED 0 blue, LED {NUM_LEDS - 1} red, then a magenta chase. '
+                    'Otherwise set one LED, or every LED with --set-all.',
+        epilog=f'LED is 0-{NUM_LEDS - 1}, or {BROADCAST} to set only the brightness '
+               f'of every bulb. BRIGHTNESS is 0-{MAX_BRIGHTNESS}; RED, GREEN, and '
+               f'BLUE are 0-{MAX_COLOR}.')
+    parser.add_argument('--set-all', action='store_true', help='set every LED')
+    parser.add_argument('values', nargs='*', type=int, help=argparse.SUPPRESS)
     args = parser.parse_args()
 
-    values = [args.led, args.brightness, args.red, args.green, args.blue]
-    if any(v is not None for v in values) and None in values:
-        parser.error('give all of LED BRIGHTNESS RED GREEN BLUE, or none')
+    if args.set_all and len(args.values) != 4:
+        parser.error('--set-all takes BRIGHTNESS RED GREEN BLUE')
+    if not args.set_all and len(args.values) not in (0, 5):
+        parser.error('give LED BRIGHTNESS RED GREEN BLUE, or no arguments')
 
     with Driver() as d:
-        if args.led is None:
-            test_pattern(d)
-            return
         try:
-            d.write_led(*values)
+            if args.set_all:
+                d.set_all(*args.values)
+            elif args.values:
+                d.write_led(*args.values)
+            else:
+                test_pattern(d)
         except ValueError as e:
             parser.error(str(e))
 

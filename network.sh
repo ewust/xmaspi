@@ -18,9 +18,9 @@ say_hello() {
 # blink SECONDS BRIGHTNESS RED GREEN BLUE: turn all bulbs off, then
 # to the given color, holding each for SECONDS
 blink() {
-    ./set_all.py 0 0 0 0
+    ./driver.py --set-all 0 0 0 0
     sleep "$1"
-    ./set_all.py "$2" "$3" "$4" "$5"
+    ./driver.py --set-all "$2" "$3" "$4" "$5"
     sleep "$1"
 }
 
