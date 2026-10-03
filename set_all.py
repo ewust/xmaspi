@@ -1,28 +1,31 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
+"""Set every LED to the same brightness and color."""
 
-import sys
+import argparse
 
-DRIVER='/dev/xmas'
+from driver import MAX_BRIGHTNESS, MAX_COLOR, NUM_LEDS, Driver
 
-def send_pkt(f, addr, brightness, green, blue, red, strand=0):
-    f.write(bytes([(strand << 6) | addr, brightness, green, blue, red]))
 
-def set_all(brightness, green, blue, red):
-    with open(DRIVER, 'wb') as f:
-        for i in range(50):
-            send_pkt(f, i, brightness, b, g, r, 0)
-            send_pkt(f, i, brightness, b, g, r, 1)
-       	f.flush()
+def set_all(d: Driver, brightness: int, red: int, green: int, blue: int):
+    for led_id in range(NUM_LEDS):
+        d.write_led_buffered(led_id, brightness, red, green, blue)
+    d.flush_buffer()
 
-if __name__=="__main__":
-    if len(sys.argv) < 4:
-        print("usage: %s BRIGHTNESS R G B\n\nSets all bulbs to the specified condition." % sys.argv[0], file=sys.stderr)
-        sys.exit(-1)
 
-    brightness = int(sys.argv[1])
-    r = int(sys.argv[2])
-    g = int(sys.argv[3])
-    b = int(sys.argv[4])
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('brightness', type=int, help=f'0-{MAX_BRIGHTNESS}')
+    parser.add_argument('red', type=int, help=f'0-{MAX_COLOR}')
+    parser.add_argument('green', type=int, help=f'0-{MAX_COLOR}')
+    parser.add_argument('blue', type=int, help=f'0-{MAX_COLOR}')
+    args = parser.parse_args()
 
-    set_all(0, 0, 0, 0)
-    set_all(brightness, g, b, r)
+    with Driver() as d:
+        try:
+            set_all(d, args.brightness, args.red, args.green, args.blue)
+        except ValueError as e:
+            parser.error(str(e))
+
+
+if __name__ == '__main__':
+    main()

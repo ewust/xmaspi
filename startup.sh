@@ -1,17 +1,18 @@
 #!/bin/bash
+#
+# Start the lights: load the kernel module, play a test pattern, then
+# serve UDP updates and watch the network.
 
-echo Loading kernel module
+cd "$(dirname "$0")" || exit 1
 
-( cd lkm ; ./setup.sh )
+echo "Loading kernel module"
+lkm/setup.sh || exit 1
 
-echo Testing strands
-
+echo "Testing strands"
 ./driver.py
 
-echo Launching UDP driver
+echo "Launching UDP driver"
+driver/udp-driver &
 
-./driver/udp-driver &
-
-echo Monitoring network status
-
-./network.sh
+echo "Monitoring network status"
+exec ./network.sh
