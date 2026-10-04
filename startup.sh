@@ -14,5 +14,8 @@ echo "Testing strands"
 echo "Launching UDP driver"
 driver/udp-driver &
 
+echo "Connecting to blinken.org stream"
+./stream-client.py &
+
 echo "Monitoring network status"
 exec ./network.sh
