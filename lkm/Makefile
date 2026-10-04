@@ -1,7 +1,8 @@
-obj-m = xmas.o
-ccflags-y := -Wno-declaration-after-statement -Wno-unused-result
-KVERSION = $(shell uname -r)
+obj-m := xmas.o
+KDIR ?= /lib/modules/$(shell uname -r)/build
+
 all:
-	make -C /lib/modules/$(KVERSION)/build M=$(PWD) modules
+	$(MAKE) -C $(KDIR) M=$(CURDIR) modules
+
 clean:
-	make -C /lib/modules/$(KVERSION)/build M=$(PWD) clean
+	$(MAKE) -C $(KDIR) M=$(CURDIR) clean

@@ -1,7 +1,17 @@
 #!/bin/bash
+#
+# Load the kernel module, which creates /dev/xmas and numbers the bulbs.
+# Arguments are passed to insmod, e.g. strand0_gpio=22 strand1_gpio=23.
 
-# load kernel module and create character device
-insmod xmas.ko
-major=`awk "\\$2==\"xmas\" {print \\$1}" /proc/devices`
-mknod /dev/xmas c $major 0
+set -e
+
+if [ -d /sys/module/xmas ]; then
+    echo "xmas module already loaded"
+    exit 0
+fi
+
+insmod "$(dirname "$0")/xmas.ko" "$@"
+
+# The module creates /dev/xmas writable by everyone; make sure udev
+# hasn't restricted it.
 chmod 222 /dev/xmas

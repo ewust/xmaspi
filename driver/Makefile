@@ -1,10 +1,15 @@
+CFLAGS ?= -O2
+CFLAGS += -Wall -Wextra -Wno-unused-parameter
+LDLIBS += -levent
 
-LDFLAGS+=-levent
-CFLAGS+=-O3
+all: udp-driver tcp-driver
 
-udp-driver:	udp-driver.c
-	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+udp-driver: udp-driver.o lights.o
+tcp-driver: tcp-driver.o lights.o
 
-tcp-driver: tcp-driver.c
-	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+udp-driver.o tcp-driver.o lights.o: lights.h
 
+clean:
+	rm -f udp-driver tcp-driver *.o
+
+.PHONY: all clean

@@ -14,16 +14,18 @@ To compile, you'll need:
     
     `apt install libevent-dev`
 
-Then run:
-
-    `make udp-driver`
-
-or
-
-    `make tcp-driver`
+Then run `make` to build both `udp-driver` and `tcp-driver`.
 
 Run
 ---
 
-Use the `-v` flag to output performance counters.
+Both listen on port 1337 for frames of 100 bulbs, each 4 bytes:
+brightness, red, green, blue. Only the bulbs that changed are sent to
+the lights; if frames arrive faster than the lights can update, the
+older ones are skipped.
+
+Options:
+
+    -v        print frames/sec and bulbs/sec once a second
+    -p PORT   listen on PORT instead of 1337
 
